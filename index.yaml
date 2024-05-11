@@ -1,0 +1,21 @@
+apiVersion: v1
+entries:
+  pgedge:
+  - annotations:
+      category: Database
+      images: |
+        - name: postgres
+          image: docker.io/pgedge/pgedge:367d6e0
+    apiVersion: v2
+    created: "2024-05-11T03:54:12.561118236Z"
+    description: 'pgEdge is fully distributed PostgreSQL with multi-active replication.
+      This chart installs the community-licensed version of pgEdge as a StatefulSet. '
+    digest: c2ea4a8ab5dcfb8e974bd823521de42f71f3962a48083c1162505ba623281854
+    home: https://pgedge.com
+    name: pgedge
+    sources:
+    - https://github.com/pgEdge/pgedge-helm
+    urls:
+    - https://github.com/devcm-repo/helm-charts/releases/download/pgedge-0.0.1/pgedge-0.0.1.tgz
+    version: 0.0.1
+generated: "2024-05-11T03:54:12.561127623Z"
