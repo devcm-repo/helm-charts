@@ -1,0 +1,3 @@
+[submodule "charts/pgedge"]
+	path = charts/pgedge
+	url = https://github.com/pgEdge/pgedge-helm.git
