@@ -5,7 +5,7 @@ This Helm Chart is a Tailscale container deployment for a tailnet relay server (
 ## Installing the Helm Chart
 
 ```shell
-helm repo add tailscale https://spreitzer.ch/helm-tailscale
+helm repo add tailscale https://devcm-repo.github.io/helm-charts
 helm install tailscale-derp tailscale/tailscale-derp
 ```
 
