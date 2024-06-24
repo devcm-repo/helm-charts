@@ -1,0 +1,13 @@
+apiVersion: v2
+name: tailscale-derp
+description: Tailscale DERP Relay Server Helm Chart
+home: https://devcm-repo.github.io/helm-charts/
+sources:
+  - https://github.com/devcm-repo/helm-charts
+maintainers:
+  - name: dev.cm
+    email: admin@dev.cm
+    url: https://github.com/devcm-repo
+icon: https://tailscale.com/files/apple-touch-icon.png
+version: 0.0.1
+appVersion: 1.44.0
