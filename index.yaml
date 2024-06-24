@@ -18,4 +18,22 @@ entries:
     urls:
     - https://github.com/devcm-repo/helm-charts/releases/download/pgedge-0.0.1/pgedge-0.0.1.tgz
     version: 0.0.1
-generated: "2024-05-11T03:54:12.561127623Z"
+  tailscale-derp:
+  - apiVersion: v2
+    appVersion: 1.44.0
+    created: "2024-06-24T10:08:50.997414253Z"
+    description: Tailscale DERP Relay Server Helm Chart
+    digest: 6cc21c0cef374c2781771c665a57bbb0f4f121884f7412b260733f6a4419146d
+    home: https://github.com/sspreitzer/helm-tailscale/tree/main/charts/tailscale-derp
+    icon: https://tailscale.com/files/apple-touch-icon.png
+    maintainers:
+    - email: admin@dev.cm
+      name: dev.cm
+      url: https://github.com/devcm-repo
+    name: tailscale-derp
+    sources:
+    - https://github.com/sspreitzer/helm-tailscale.git
+    urls:
+    - https://github.com/devcm-repo/helm-charts/releases/download/tailscale-derp-1.44.0/tailscale-derp-1.44.0.tgz
+    version: 1.44.0
+generated: "2024-06-24T10:08:50.997419333Z"
