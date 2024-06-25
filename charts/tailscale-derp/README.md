@@ -11,7 +11,7 @@ helm install tailscale-derp tailscale/tailscale-derp
 
 ## Helm Chart Configuration Examples
 
-A working configuration: 
+A working configuration:
 
 ```yaml
 service:
