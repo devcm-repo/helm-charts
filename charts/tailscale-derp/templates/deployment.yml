@@ -21,11 +21,20 @@ spec:
       affinity: {{- toYaml .Values.affinity | nindent 8 }}
       {{- end }}
       containers:
-      - name: "{{ .Release.Name }}-{{ .Chart.Name }}"
-        image: "{{ .Values.image.name }}:v{{ .Chart.AppVersion }}"
-        ports:
-        - containerPort: 80
-        - containerPort: 443
-        - containerPort: 3478
-        args:
-        - "--hostname={{ .Values.hostname }}"
+        name: "{{ .Release.Name }}-{{ .Chart.Name }}"
+          image: "{{ .Values.image.name }}:v{{ .Chart.AppVersion }}"
+          ports:
+            - containerPort: 80
+            - containerPort: 443
+            - containerPort: 3478
+          env:
+            - name: TAILSCALE_HOSTNAME
+              value: "{{ or .Values.tailscale.hostname .Release.Name }}"
+            - name: TAILSCALE_AUTH_KEY
+              value: "{{ .Values.tailscale.auth_key }}"
+            - name: TAILSCALE_DERP_HOSTNAME
+              value: "{{ .Values.drep.hostname }}"
+            - name: TAILSCALE_DERP_ADDR
+              value: "{{ .Values.drep.addr }}"
+            - name: TAILSCALE_DERP_VERIFY_CLIENTS
+              value: "{{ .Values.drep.verify_clients }}"

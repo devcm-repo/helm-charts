@@ -3,10 +3,18 @@ image:
   pullPolicy: IfNotPresent
 
 service:
-  type: LoadBalancer
+  type: ClusterIP
   annotations: {}
 
-hostname: 'derp.example.com'
-
 nodeSelector: {}
+
 affinity: {}
+
+tailscale:
+# hostname: ''
+  auth_key: ''
+
+drep:
+  hostname: derp.examples.com
+# addr: ''
+  verify_clients: true

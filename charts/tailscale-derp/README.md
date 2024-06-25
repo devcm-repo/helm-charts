@@ -14,15 +14,10 @@ helm install tailscale-derp tailscale/tailscale-derp
 A working configuration:
 
 ```yaml
-service:
-  annotations:
-    service.beta.kubernetes.io/azure-dns-label-name: my-derp-01
-
-hostname: my-derp-01.switzerlandnorth.cloudapp.azure.com
+hostname: derp.dev.cm
 
 nodeSelector:
-  topology.kubernetes.io/region: switzerlandnorth
-  topology.kubernetes.io/zone: switzerlandnorth-1
+  topology.kubernetes.io/region: cn-hk
 ```
 
 ## Helm Chart Values
@@ -33,6 +28,9 @@ nodeSelector:
 | `image.pullPolicy` | Kubernetes pullPolicy to use for starting the container image. | `IfNotPresent` |
 | `service.type` | Kubernetes Service type. | `LoadBalancer` |
 | `service.annotations` | A map/dict of Kubernetes Service annotations. | `{}` |
-| `hostname` | DERP hostname to use. Must be the same as of the derpMap in the tailnet ACL. | `derp.example.com` |
 | `nodeSelector` | A map/dict of Kubernetes Pod nodeSelector node labels. | `{}` |
 | `affinity` | A map/dict of Kubernetes Pod affinity rules. | `{}` |
+| `tailscale.hostname` | Tailscale hostname | `Release.Name` |
+| `tailscale.auth_key` | Tailscale auth_key | `''` |
+| `drep.hostname` | Derp server hostname | `'derp.examples.com'` |
+| `drep.verify_clients` | Derp server will enable authentication | `true` |
