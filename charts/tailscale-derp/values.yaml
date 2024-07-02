@@ -6,15 +6,15 @@ service:
   type: ClusterIP
   annotations: {}
 
+hostNetwork: false
+
 nodeSelector: {}
 
 affinity: {}
 
-tailscale:
-# hostname: ''
-  auth_key: ''
-
-drep:
+derp:
   hostname: derp.examples.com
-# addr: ''
-  verify_clients: true
+  verify_clients: false
+  http_port: 80
+  https_port: 443
+  stun_port: 3478

@@ -21,20 +21,54 @@ spec:
       affinity: {{- toYaml .Values.affinity | nindent 8 }}
       {{- end }}
       containers:
-        name: "{{ .Release.Name }}-{{ .Chart.Name }}"
+        - name: "{{ .Release.Name }}-{{ .Chart.Name }}"
           image: "{{ .Values.image.name }}:v{{ .Chart.AppVersion }}"
           ports:
-            - containerPort: 80
-            - containerPort: 443
-            - containerPort: 3478
-          env:
-            - name: TAILSCALE_HOSTNAME
-              value: "{{ or .Values.tailscale.hostname .Release.Name }}"
-            - name: TAILSCALE_AUTH_KEY
-              value: "{{ .Values.tailscale.auth_key }}"
-            - name: TAILSCALE_DERP_HOSTNAME
-              value: "{{ .Values.drep.hostname }}"
-            - name: TAILSCALE_DERP_ADDR
-              value: "{{ .Values.drep.addr }}"
-            - name: TAILSCALE_DERP_VERIFY_CLIENTS
-              value: "{{ .Values.drep.verify_clients }}"
+            {{- if gt (int .Values.derp.http_port) -1 }}
+            - name: http
+              hostPort: {{ .Values.derp.http_port }}
+              containerPort: {{ .Values.derp.http_port }}
+              protocol: TCP
+            {{- end }}
+            - name: https
+              hostPort: {{ .Values.derp.https_port }}
+              containerPort: {{ .Values.derp.https_port }}
+              protocol: TCP
+            - name: stun
+              hostPort: {{ .Values.derp.stun_port }}
+              containerPort: {{ .Values.derp.stun_port }}
+              protocol: UDP
+          args:
+            - "--hostname={{ .Values.derp.hostname }}"
+            - "--verify-clients={{ .Values.derp.verify_clients }}"
+            {{- if .Values.derp.certdir }}
+            - "--certmode=manual"
+            - "--certdir={{ .Values.derp.certdir }}"
+            {{- end }}
+            {{- if .Values.derp.http_port }}
+            - "--http-port={{ .Values.derp.http_port }}"
+            {{- end }}
+            {{- if .Values.derp.https_port }}
+            - "--a=:{{ .Values.derp.https_port }}"
+            {{- end }}
+            {{- if .Values.derp.stun_port }}
+            - "--stun-port={{ .Values.derp.stun_port }}"
+            {{- end }}
+          volumeMounts:
+            {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
+            {{- if .Values.derp.verify_clients }}
+            - mountPath: /var/run/tailscale/tailscaled.sock
+              name: tailscale-socket
+            {{- end }}
+      {{- if .Values.hostNetwork }}
+      hostNetwork: true
+      {{- end }}
+      volumes:
+        {{- toYaml .Values.extraVolumes | nindent 8 }}
+        {{- if .Values.derp.verify_clients }}
+        - hostPath:
+            path: /run/tailscale/tailscaled.sock
+            type: Socket
+          name: tailscale-socket
+        {{- end }}
+

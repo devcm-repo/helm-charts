@@ -28,9 +28,14 @@ nodeSelector:
 | `image.pullPolicy` | Kubernetes pullPolicy to use for starting the container image. | `IfNotPresent` |
 | `service.type` | Kubernetes Service type. | `LoadBalancer` |
 | `service.annotations` | A map/dict of Kubernetes Service annotations. | `{}` |
+| `hostNetwork` | This service will be disabled when hostNetwork is enableds. | `false` |
 | `nodeSelector` | A map/dict of Kubernetes Pod nodeSelector node labels. | `{}` |
+| `extraVolumes` | Extra volumes to add to the deployment. | `[]` |
+| `extraVolumeMounts` | Extra volume mounts to add to the container. Normally used with `extraVolumes`. | `[]` |
 | `affinity` | A map/dict of Kubernetes Pod affinity rules. | `{}` |
-| `tailscale.hostname` | Tailscale hostname | `Release.Name` |
-| `tailscale.auth_key` | Tailscale auth_key | `''` |
-| `drep.hostname` | Derp server hostname | `'derp.examples.com'` |
-| `drep.verify_clients` | Derp server will enable authentication | `true` |
+| `derp.hostname` | Derp server hostname. | `'derp.examples.com'` |
+| `derp.verify_clients` | Derp server will enable authentication. | `true` |
+| `derp.certdir` | Start a derper with your own certificate. | `` |
+| `derp.http_port` | The port on which to serve HTTP. Set to -1 to disable. | `80` |
+| `derp.https_port` | The port on which to serve HTTPS. | `443` |
+| `derp.stun_port` | The UDP port on which to serve STUN. | `3478` |

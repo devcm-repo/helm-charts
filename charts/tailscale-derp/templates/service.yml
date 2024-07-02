@@ -1,3 +1,4 @@
+{{- if not .Values.hostNetwork }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -10,12 +11,16 @@ spec:
   selector:
     app: "{{ .Release.Name }}-{{ .Chart.Name }}"
   ports:
+    {{- if gt (int .Values.derp.http_port) -1 }}
     - name: http
-      port: 80
-      targetPort: 80
+      port: {{ .Values.derp.http_port }}
+      targetPort: {{ .Values.derp.http_port }}
+    {{- end }}
     - name: https
-      port: 443
-      targetPort: 443
+      port: {{ .Values.derp.https_port }}
+      targetPort: {{ .Values.derp.https_port }}
     - name: stun
-      port: 3478
-      targetPort: 3478
+      port: {{ .Values.derp.stun_port }}
+      targetPort: {{ .Values.derp.stun_port }}
+      protocol: UDP
+{{- end }}
