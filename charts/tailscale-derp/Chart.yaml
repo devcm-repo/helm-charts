@@ -9,5 +9,5 @@ maintainers:
     email: admin@dev.cm
     url: https://github.com/devcm-repo
 icon: https://tailscale.com/files/apple-touch-icon.png
-version: 0.0.3
-appVersion: 1.68.0
+version: 0.0.4
+appVersion: 1.76.1
