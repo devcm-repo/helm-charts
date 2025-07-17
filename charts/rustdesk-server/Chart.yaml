@@ -1,14 +1,14 @@
 apiVersion: v2
 name: rustdesk-server
 description: RustDesk Server Helm Chart
-home: https://rustdesk.com/
+home: https://devcm-repo.github.io/helm-charts/
 sources:
-  - https://github.com/rustdesk/rustdesk-server
+  - https://github.com/devcm-repo/helm-charts
 maintainers:
   - name: dev.cm
     email: admin@dev.cm
     url: https://github.com/devcm-repo
 icon: https://rustdesk.com/favicon.ico
-version: 0.0.1
+version: 0.0.2
 appVersion: latest
 
