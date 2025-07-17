@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Release.Name }}-{{ .Chart.Name }}"
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: "{{ .Release.Name }}-{{ .Chart.Name }}"
+  template:
+    metadata:
+      labels:
+        app: "{{ .Release.Name }}-{{ .Chart.Name }}"
+    spec:
+      {{- if .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml .Values.nodeSelector | nindent 8 }}
+      {{- end }}
+      {{- if .Values.affinity }}
+      affinity:
+        {{- toYaml .Values.affinity | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: "{{ .Release.Name }}-{{ .Chart.Name }}"
+          image: "{{ .Values.image.name }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: api
+              containerPort: 21114
+              protocol: TCP
+            - name: websocket-id
+              containerPort: 21118
+              protocol: TCP
+            - name: websocket-relay
+              containerPort: 21119
+              protocol: TCP
+            - name: signal
+              containerPort: 21115
+              hostPort: {{ .Values.rustdeskServer.ports.signal }}
+              protocol: TCP
+            - name: id
+              containerPort: 21116
+              hostPort: {{ .Values.rustdeskServer.ports.id }}
+              protocol: TCP
+            - name: id-udp
+              containerPort: 21116
+              hostPort: {{ .Values.rustdeskServer.ports.id }}
+              protocol: UDP
+            - name: relay
+              containerPort: 21117
+              hostPort: {{ .Values.rustdeskServer.ports.relay }}
+              protocol: TCP
+          env:
+            - name: ENCRYPTED_ONLY
+              value: "{{ if .Values.rustdeskServer.encryptedOnly }}1{{ else }}0{{ end }}"
+            - name: MUST_LOGIN
+              value: "{{ if .Values.rustdeskServer.mustLogin }}Y{{ else }}N{{ end }}"
+            - name: RELAY
+              value: "{{ .Values.rustdeskServer.server }}:{{ .Values.rustdeskServer.ports.relay }}"
+            - name: RUSTDESK_API_RUSTDESK_ID_SERVER
+              value: "{{ .Values.rustdeskApi.server }}"
+            - name: RUSTDESK_API_RUSTDESK_RELAY_SERVER
+              value: "{{ .Values.rustdeskApi.server }}"
+            - name: RUSTDESK_API_RUSTDESK_API_SERVER
+              value: "https://{{ .Values.rustdeskApi.server }}"
+            {{- if .Values.rustdeskServer.extraEnvs }}
+            {{- range .Values.rustdeskServer.extraEnvs }}
+            - name: {{ .name }}
+              value: "{{ .value }}"
+            {{- end }}
+            {{- end }}
+          volumeMounts:
+            - name: data
+              mountPath: /data
+              subPath: server
+            - name: data
+              mountPath: /app/data
+              subPath: api
+
+      volumes:
+        - name: data
+        {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: "{{ .Release.Name }}-{{ .Chart.Name }}-data"
+        {{- else }}
+          emptyDir: {}
+        {{- end }}
+

@@ -14,12 +14,17 @@ spec:
       labels:
         app: "{{ .Release.Name }}-{{ .Chart.Name }}"
     spec:
-      {{- if not (empty .Values.nodeSelector) }}
-      nodeSelector: {{- toYaml .Values.nodeSelector | nindent 8 }}
+      {{- if .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml .Values.nodeSelector | nindent 8 }}
       {{- end }}
-      {{- if not (empty .Values.affinity) }}
-      affinity: {{- toYaml .Values.affinity | nindent 8 }}
+      {{- if .Values.affinity }}
+      affinity:
+        {{- toYaml .Values.affinity | nindent 8 }}
       {{- end }}
+      {{ - if .Values.hostNetwork }}
+      hostNetwork: true
+      {{ - end }}
       containers:
         - name: "{{ .Release.Name }}-{{ .Chart.Name }}"
           image: "{{ .Values.image.name }}:v{{ .Chart.AppVersion }}"
@@ -60,9 +65,6 @@ spec:
             - mountPath: /var/run/tailscale/tailscaled.sock
               name: tailscale-socket
             {{- end }}
-      {{- if .Values.hostNetwork }}
-      hostNetwork: true
-      {{- end }}
       volumes:
         {{- toYaml .Values.extraVolumes | nindent 8 }}
         {{- if .Values.derp.verify_clients }}

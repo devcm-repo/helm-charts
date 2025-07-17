@@ -1,0 +1,39 @@
+image:
+  name: lejianwen/rustdesk-server-s6
+  tag: latest
+  pullPolicy: IfNotPresent
+
+nodeSelector: {}
+
+affinity: {}
+
+persistence:
+  enabled: true
+  data:
+    storageClass: ""
+    size: 2Gi
+    accessMode: ReadWriteOnce
+
+rustdeskServer:
+  encryptedOnly: true
+  mustLogin: false
+  server: "rustdesk-relay.example.com"
+  ports:
+    signal: 21115
+    id: 21116
+    relay: 21117
+
+rustdeskApi:
+  server: "rustdesk-api.example.com"
+  ports:
+    api: 21114
+    websocketId: 21118
+    websocketRelay: 21119
+  service:
+    type: ClusterIP
+    annotations: {}
+  ingress:
+    enabled: true
+    className: ""
+    host: "rustdesk-api.example.com"
+    annotations: {}

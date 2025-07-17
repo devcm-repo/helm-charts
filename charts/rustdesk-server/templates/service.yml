@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ .Release.Name }}-{{ .Chart.Name }}"
+  {{- if not (empty .Values.rustdeskApi.service.annotations) }}
+  annotations: {{- toYaml .Values.rustdeskApi.service.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  type: "{{ .Values.rustdeskApi.service.type }}"
+  selector:
+    app: "{{ .Release.Name }}-{{ .Chart.Name }}"
+  ports:
+    - name: api
+      port: {{ .Values.rustdeskApi.ports.api }}
+      targetPort: 21114
+      protocol: TCP
+    - name: websocket-id
+      port: {{ .Values.rustdeskApi.ports.websocketId }}
+      targetPort: 21118
+      protocol: TCP
+    - name: websocket-relay
+      port: {{ .Values.rustdeskApi.ports.websocketRelay }}
+      targetPort: 21119
+      protocol: TCP

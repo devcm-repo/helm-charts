@@ -1,0 +1,39 @@
+{{- if .Values.rustdeskApi.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: "{{ .Release.Name }}-{{ .Chart.Name }}"
+  annotations:
+    {{- if .Values.rustdeskApi.ingress.annotations }}
+    {{- toYaml .Values.rustdeskApi.ingress.annotations | nindent 4 }}
+    {{- end }}
+spec:
+  {{- if .Values.rustdeskApi.ingress.className }}
+  ingressClassName: {{ .Values.rustdeskApi.ingress.className }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.rustdeskApi.ingress.host }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: "{{ .Release.Name }}-{{ .Chart.Name }}"
+                port:
+                  number: {{ .Values.rustdeskApi.ports.api }}
+          - path: /ws/id
+            pathType: Prefix
+            backend:
+              service:
+                name: "{{ .Release.Name }}-{{ .Chart.Name }}"
+                port:
+                  number: {{ .Values.rustdeskApi.ports.websocketId }}
+          - path: /ws/relay
+            pathType: Prefix
+            backend:
+              service:
+                name: "{{ .Release.Name }}-{{ .Chart.Name }}"
+                port:
+                  number: {{ .Values.rustdeskApi.ports.websocketRelay }}
+{{- end }}
