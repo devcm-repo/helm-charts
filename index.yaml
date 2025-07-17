@@ -1,6 +1,41 @@
 apiVersion: v1
 entries:
+  rustdesk-server:
+  - apiVersion: v2
+    appVersion: latest
+    created: "2025-07-17T15:03:09.877433971Z"
+    description: RustDesk Server Helm Chart
+    digest: 7a6214b35cf127044a3f627c4413391f10d1a228d688aeb218100c1addf4339e
+    home: https://devcm-repo.github.io/helm-charts/
+    icon: https://rustdesk.com/favicon.ico
+    maintainers:
+    - email: admin@dev.cm
+      name: dev.cm
+      url: https://github.com/devcm-repo
+    name: rustdesk-server
+    sources:
+    - https://github.com/devcm-repo/helm-charts
+    urls:
+    - https://github.com/devcm-repo/helm-charts/releases/download/rustdesk-server-0.0.2/rustdesk-server-0.0.2.tgz
+    version: 0.0.2
   tailscale-derp:
+  - apiVersion: v2
+    appVersion: 1.82.0
+    created: "2025-07-17T15:03:10.008354777Z"
+    description: Tailscale DERP Relay Server Helm Chart
+    digest: df1136dd1ac460598a6ba58a2dba0e5252f6339c3aad6859611dbfe49ddd031d
+    home: https://devcm-repo.github.io/helm-charts/
+    icon: https://tailscale.com/files/apple-touch-icon.png
+    maintainers:
+    - email: admin@dev.cm
+      name: dev.cm
+      url: https://github.com/devcm-repo
+    name: tailscale-derp
+    sources:
+    - https://github.com/devcm-repo/helm-charts
+    urls:
+    - https://github.com/devcm-repo/helm-charts/releases/download/tailscale-derp-0.0.7/tailscale-derp-0.0.7.tgz
+    version: 0.0.7
   - apiVersion: v2
     appVersion: 1.82.0
     created: "2025-04-09T03:57:56.194917779Z"
@@ -103,4 +138,4 @@ entries:
     urls:
     - https://github.com/devcm-repo/helm-charts/releases/download/tailscale-derp-0.0.1/tailscale-derp-0.0.1.tgz
     version: 0.0.1
-generated: "2025-04-09T03:57:56.194942004Z"
+generated: "2025-07-17T15:03:10.008399542Z"
