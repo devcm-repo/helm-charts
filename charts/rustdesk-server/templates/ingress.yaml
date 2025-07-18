@@ -28,12 +28,12 @@ spec:
               service:
                 name: "{{ .Release.Name }}-{{ .Chart.Name }}"
                 port:
-                  number: {{ .Values.rustdeskApi.ports.websocketId }}
+                  number: {{ .Values.rustdeskServer.ports.websocketId }}
           - path: /ws/relay
             pathType: Prefix
             backend:
               service:
                 name: "{{ .Release.Name }}-{{ .Chart.Name }}"
                 port:
-                  number: {{ .Values.rustdeskApi.ports.websocketRelay }}
+                  number: {{ .Values.rustdeskServer.ports.websocketRelay }}
 {{- end }}
