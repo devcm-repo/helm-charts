@@ -65,6 +65,8 @@ spec:
               value: "{{ .Values.rustdeskApi.server }}"
             - name: RUSTDESK_API_RUSTDESK_API_SERVER
               value: "https://{{ .Values.rustdeskApi.server }}"
+            - name : RUSTDESK_API_RUSTDESK_WS_HOST
+              value: "wss://{{ .Values.rustdeskApi.server }}"
             {{- if .Values.rustdeskServer.extraEnvs }}
             {{- range .Values.rustdeskServer.extraEnvs }}
             - name: {{ .name }}

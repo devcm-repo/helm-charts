@@ -15,10 +15,10 @@ spec:
       targetPort: 21114
       protocol: TCP
     - name: websocket-id
-      port: {{ .Values.rustdeskApi.ports.websocketId }}
+      port: {{ .Values.rustdeskServer.ports.websocketId }}
       targetPort: 21118
       protocol: TCP
     - name: websocket-relay
-      port: {{ .Values.rustdeskApi.ports.websocketRelay }}
+      port: {{ .Values.rustdeskServer.ports.websocketRelay }}
       targetPort: 21119
       protocol: TCP

@@ -17,18 +17,18 @@ persistence:
 rustdeskServer:
   encryptedOnly: true
   mustLogin: false
-  server: "rustdesk-relay.example.com"
+  server: "rustdesk-server.example.com"
   ports:
     signal: 21115
     id: 21116
     relay: 21117
+    websocketId: 21118
+    websocketRelay: 21119
 
 rustdeskApi:
   server: "rustdesk-api.example.com"
   ports:
     api: 21114
-    websocketId: 21118
-    websocketRelay: 21119
   service:
     type: ClusterIP
     annotations: {}
