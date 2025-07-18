@@ -13,6 +13,8 @@ persistence:
     storageClass: ""
     size: 2Gi
     accessMode: ReadWriteOnce
+    annotations:
+      helm.sh/resource-policy: keep
 
 rustdeskServer:
   encryptedOnly: true

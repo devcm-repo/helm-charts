@@ -3,6 +3,10 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: "{{ .Release.Name }}-{{ .Chart.Name }}-data"
+  annotations:
+    {{- if .Values.persistence.data.annotations }}
+    {{- toYaml .Values.persistence.data.annotations | nindent 4 }}
+    {{- end }}
 spec:
   accessModes:
     - {{ .Values.persistence.data.accessMode }}

@@ -9,6 +9,6 @@ maintainers:
     email: admin@dev.cm
     url: https://github.com/devcm-repo
 icon: https://rustdesk.com/favicon.ico
-version: 0.0.4
+version: 0.0.5
 appVersion: latest
 
