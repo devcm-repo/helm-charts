@@ -3,6 +3,23 @@ entries:
   rustdesk-server:
   - apiVersion: v2
     appVersion: latest
+    created: "2025-07-21T02:17:28.71767036Z"
+    description: RustDesk Server Helm Chart
+    digest: e7aef11c4537d01b96de0019e074f871f7151c6b01a33b6c51d515136154a6ec
+    home: https://devcm-repo.github.io/helm-charts/
+    icon: https://rustdesk.com/favicon.ico
+    maintainers:
+    - email: admin@dev.cm
+      name: dev.cm
+      url: https://github.com/devcm-repo
+    name: rustdesk-server
+    sources:
+    - https://github.com/devcm-repo/helm-charts
+    urls:
+    - https://github.com/devcm-repo/helm-charts/releases/download/rustdesk-server-0.0.6/rustdesk-server-0.0.6.tgz
+    version: 0.0.6
+  - apiVersion: v2
+    appVersion: latest
     created: "2025-07-18T13:01:06.88497884Z"
     description: RustDesk Server Helm Chart
     digest: 6a6b5f6eb27f7f12ec2432217e4108c4424a5f5acb332df7ff41151d38b88e16
@@ -189,4 +206,4 @@ entries:
     urls:
     - https://github.com/devcm-repo/helm-charts/releases/download/tailscale-derp-0.0.1/tailscale-derp-0.0.1.tgz
     version: 0.0.1
-generated: "2025-07-18T13:01:06.885008656Z"
+generated: "2025-07-21T02:17:28.717722187Z"
