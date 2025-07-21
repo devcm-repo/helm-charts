@@ -1,12 +1,16 @@
 {{- if .Values.persistence.enabled }}
+{{- $pvcName := printf "%s-%s-data" .Release.Name .Chart.Name }}
+{{- if or (not .Values.persistence.checkExisting) (not (lookup "v1" "PersistentVolumeClaim" .Release.Namespace $pvcName)) }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: "{{ .Release.Name }}-{{ .Chart.Name }}-data"
+  name: {{ $pvcName }}
+  {{- if .Values.persistence.data.annotations }}
   annotations:
-    {{- if .Values.persistence.data.annotations }}
-    {{- toYaml .Values.persistence.data.annotations | nindent 4 }}
+    {{- range $key, $value := .Values.persistence.data.annotations }}
+    {{ $key }}: {{ $value | quote }}
     {{- end }}
+  {{- end }}
 spec:
   accessModes:
     - {{ .Values.persistence.data.accessMode }}
@@ -16,4 +20,5 @@ spec:
   {{- if .Values.persistence.data.storageClass }}
   storageClassName: {{ .Values.persistence.data.storageClass }}
   {{- end }}
+{{- end }}
 {{- end }}
