@@ -88,6 +88,23 @@ entries:
     version: 0.0.2
   tailscale-derp:
   - apiVersion: v2
+    appVersion: v1.86.2
+    created: "2025-08-01T10:12:00.058893223Z"
+    description: Tailscale DERP Relay Server Helm Chart
+    digest: 097a709eb2ae092dc8f82c478f3cbfb6042ba80b7bb5880960ea96b8fc078cc9
+    home: https://devcm-repo.github.io/helm-charts/
+    icon: https://tailscale.com/files/apple-touch-icon.png
+    maintainers:
+    - email: admin@dev.cm
+      name: dev.cm
+      url: https://github.com/devcm-repo
+    name: tailscale-derp
+    sources:
+    - https://github.com/devcm-repo/helm-charts
+    urls:
+    - https://github.com/devcm-repo/helm-charts/releases/download/tailscale-derp-0.0.8/tailscale-derp-0.0.8.tgz
+    version: 0.0.8
+  - apiVersion: v2
     appVersion: 1.82.0
     created: "2025-07-17T15:03:10.008354777Z"
     description: Tailscale DERP Relay Server Helm Chart
@@ -206,4 +223,4 @@ entries:
     urls:
     - https://github.com/devcm-repo/helm-charts/releases/download/tailscale-derp-0.0.1/tailscale-derp-0.0.1.tgz
     version: 0.0.1
-generated: "2025-07-21T02:17:28.717722187Z"
+generated: "2025-08-01T10:12:00.058940404Z"
