@@ -27,7 +27,7 @@ spec:
       {{ - end }}
       containers:
         - name: "{{ .Release.Name }}-{{ .Chart.Name }}"
-          image: "{{ .Values.image.name }}:v{{ .Chart.AppVersion }}"
+          image: "{{ .Values.image.name }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           ports:
             {{- if gt (int .Values.derp.http_port) -1 }}
             - name: http
