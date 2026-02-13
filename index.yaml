@@ -3,6 +3,23 @@ entries:
   rustdesk-server:
   - apiVersion: v2
     appVersion: latest
+    created: "2026-02-13T09:38:25.163720908Z"
+    description: RustDesk Server Helm Chart
+    digest: d88012ec233492705ea5dd538c24204b0dbb34f3d0a94f69cdef8fc580032e72
+    home: https://devcm-repo.github.io/helm-charts/
+    icon: https://rustdesk.com/favicon.ico
+    maintainers:
+    - email: admin@dev.cm
+      name: dev.cm
+      url: https://github.com/devcm-repo
+    name: rustdesk-server
+    sources:
+    - https://github.com/devcm-repo/helm-charts
+    urls:
+    - https://github.com/devcm-repo/helm-charts/releases/download/rustdesk-server-0.0.7/rustdesk-server-0.0.7.tgz
+    version: 0.0.7
+  - apiVersion: v2
+    appVersion: latest
     created: "2025-07-21T02:17:28.71767036Z"
     description: RustDesk Server Helm Chart
     digest: e7aef11c4537d01b96de0019e074f871f7151c6b01a33b6c51d515136154a6ec
@@ -87,6 +104,23 @@ entries:
     - https://github.com/devcm-repo/helm-charts/releases/download/rustdesk-server-0.0.2/rustdesk-server-0.0.2.tgz
     version: 0.0.2
   tailscale-derp:
+  - apiVersion: v2
+    appVersion: v1.90.6
+    created: "2026-02-13T09:38:25.385544409Z"
+    description: Tailscale DERP Relay Server Helm Chart
+    digest: f4b3f87cb8a887acfbec36d4a72cf9831362cbcc2c384de72e7c847d08c8ce29
+    home: https://devcm-repo.github.io/helm-charts/
+    icon: https://tailscale.com/files/apple-touch-icon.png
+    maintainers:
+    - email: admin@dev.cm
+      name: dev.cm
+      url: https://github.com/devcm-repo
+    name: tailscale-derp
+    sources:
+    - https://github.com/devcm-repo/helm-charts
+    urls:
+    - https://github.com/devcm-repo/helm-charts/releases/download/tailscale-derp-0.0.10/tailscale-derp-0.0.10.tgz
+    version: 0.0.10
   - apiVersion: v2
     appVersion: v1.86.2
     created: "2025-08-01T10:19:48.696389729Z"
@@ -240,4 +274,4 @@ entries:
     urls:
     - https://github.com/devcm-repo/helm-charts/releases/download/tailscale-derp-0.0.1/tailscale-derp-0.0.1.tgz
     version: 0.0.1
-generated: "2025-08-01T10:19:48.696435445Z"
+generated: "2026-02-13T09:38:25.385609983Z"
