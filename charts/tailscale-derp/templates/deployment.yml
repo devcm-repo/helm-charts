@@ -11,6 +11,10 @@ spec:
       app: "{{ .Release.Name }}-{{ .Chart.Name }}"
   template:
     metadata:
+      annotations:
+        {{- if .Values.podAnnotations }}
+        {{- toYaml .Values.podAnnotations | nindent 8 }}
+        {{- end }}
       labels:
         app: "{{ .Release.Name }}-{{ .Chart.Name }}"
     spec:
