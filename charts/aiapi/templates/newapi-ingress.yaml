@@ -1,0 +1,32 @@
+{{- if .Values.newapi.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: "{{ include "aiapi.fullname" . }}-newapi"
+  labels:
+    {{- include "aiapi.labels" . | nindent 4 }}
+    app.kubernetes.io/component: newapi
+  {{- with .Values.newapi.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.newapi.ingress.className }}
+  ingressClassName: {{ .Values.newapi.ingress.className }}
+  {{- end }}
+  {{- with .Values.newapi.ingress.tls }}
+  tls:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.newapi.ingress.host }}
+      http:
+        paths:
+          - path: {{ .Values.newapi.ingress.path }}
+            pathType: {{ .Values.newapi.ingress.pathType }}
+            backend:
+              service:
+                name: "{{ include "aiapi.fullname" . }}-newapi"
+                port:
+                  number: {{ .Values.newapi.service.port }}
+{{- end }}

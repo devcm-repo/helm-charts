@@ -1,0 +1,45 @@
+{{- if .Values.newapi.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: "{{ include "aiapi.fullname" . }}-newapi"
+  labels:
+    {{- include "aiapi.labels" . | nindent 4 }}
+    app.kubernetes.io/component: newapi
+  {{- with .Values.persistence.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+    - {{ .Values.persistence.accessMode | quote }}
+  {{- if .Values.persistence.storageClass }}
+  storageClassName: {{ .Values.persistence.storageClass | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.newapi.persistence.size | quote }}
+{{- end }}
+---
+{{- if .Values.cliproxyapi.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: "{{ include "aiapi.fullname" . }}-cliproxyapi"
+  labels:
+    {{- include "aiapi.labels" . | nindent 4 }}
+    app.kubernetes.io/component: cliproxyapi
+  {{- with .Values.persistence.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+    - {{ .Values.persistence.accessMode | quote }}
+  {{- if .Values.persistence.storageClass }}
+  storageClassName: {{ .Values.persistence.storageClass | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.cliproxyapi.persistence.size | quote }}
+{{- end }}

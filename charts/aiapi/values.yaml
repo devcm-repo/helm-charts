@@ -1,0 +1,154 @@
+tz: Asia/Shanghai
+
+global:
+  defaultStorageClass: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+nodeSelector: {}
+affinity: {}
+podAnnotations: {}
+
+persistence:
+  storageClass: ""
+  accessMode: ReadWriteOnce
+  annotations: {}
+
+newapi:
+  replicas: 1
+  image:
+    repository: calciumion/new-api
+    tag: latest
+    pullPolicy: IfNotPresent
+  port: 3000
+  frontendBaseUrl: https://aiapi.dev.cm
+  sessionSecret: change-me
+  # Deprecated: use newapi.database.dsn or newapi.database.existingSecret.
+  sqlDsn: ""
+  # Deprecated: use newapi.cache.redisConnString or newapi.cache.existingSecret.
+  redisConnString: ""
+  database:
+    dsn: ""
+    existingSecret:
+      name: ""
+      key: SQL_DSN
+  cache:
+    redisConnString: ""
+    existingSecret:
+      name: ""
+      key: REDIS_CONN_STRING
+  extraEnv:
+    - name: MEMORY_CACHE_ENABLED
+      value: "true"
+    - name: BATCH_UPDATE_ENABLED
+      value: "true"
+    - name: REDIS_POOL_SIZE
+      value: "50"
+    - name: RELAY_MAX_IDLE_CONNS
+      value: "1000"
+    - name: RELAY_MAX_IDLE_CONNS_PER_HOST
+      value: "200"
+  resources: {}
+  persistence:
+    enabled: true
+    size: 2Gi
+  service:
+    type: ClusterIP
+    port: 3000
+    annotations: {}
+  ingress:
+    enabled: true
+    className: ""
+    host: aiapi.dev.cm
+    path: /
+    pathType: Prefix
+    annotations: {}
+    tls: []
+
+cliproxyapi:
+  replicas: 1
+  image:
+    repository: eceasy/cli-proxy-api
+    tag: latest
+    pullPolicy: IfNotPresent
+  port: 8080
+  resources: {}
+  persistence:
+    enabled: true
+    size: 1Gi
+  service:
+    type: ClusterIP
+    port: 8080
+    annotations: {}
+  ingress:
+    enabled: false
+    className: ""
+    host: aiapi.dev.cm
+    path: /cpa
+    pathType: Prefix
+    annotations: {}
+    tls: []
+  config: |
+    host: "0.0.0.0"
+    port: 8080
+
+    api-keys:
+      - "change-me"
+
+    remote-management:
+      allow-remote: false
+      secret-key: "change-me"
+      disable-control-panel: false
+      disable-auto-update-panel: false
+      panel-github-repository: "https://github.com/router-for-me/Cli-Proxy-API-Management-Center"
+
+    auth-dir: "~/.cli-proxy-api"
+
+    commercial-mode: true
+    debug: false
+
+    logging-to-file: true
+    logs-max-total-size-mb: 100
+    usage-statistics-enabled: true
+    request-retry: 1
+    max-retry-interval: 5
+    nonstream-keepalive-interval: 300
+
+    streaming:
+      keepalive-seconds: 300
+      bootstrap-retries: 1
+
+    quota-exceeded:
+      switch-project: true
+      switch-preview-model: true
+      antigravity-credits: true
+
+    routing:
+      strategy: "round-robin"
+      session-affinity: false
+      session-affinity-ttl: "1h"
+
+postgresql:
+  enabled: true
+  auth:
+    username: newapi
+    password: change-me
+    database: newapi
+  primary:
+    resources: {}
+    persistence:
+      enabled: true
+      size: 10Gi
+
+valkey:
+  enabled: true
+  architecture: standalone
+  auth:
+    enabled: false
+  primary:
+    resources: {}
+    persistence:
+      enabled: true
+      size: 2Gi

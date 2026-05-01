@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ include "aiapi.fullname" . }}-cliproxyapi"
+  labels:
+    {{- include "aiapi.labels" . | nindent 4 }}
+    app.kubernetes.io/component: cliproxyapi
+spec:
+  replicas: {{ .Values.cliproxyapi.replicas }}
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "aiapi.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: cliproxyapi
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "aiapi.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: cliproxyapi
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: cliproxyapi
+          image: "{{ .Values.cliproxyapi.image.repository }}:{{ .Values.cliproxyapi.image.tag }}"
+          imagePullPolicy: {{ .Values.cliproxyapi.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.cliproxyapi.port }}
+              protocol: TCP
+          env:
+            - name: TZ
+              value: {{ .Values.tz | quote }}
+          readinessProbe:
+            tcpSocket:
+              port: http
+          livenessProbe:
+            tcpSocket:
+              port: http
+          {{- with .Values.cliproxyapi.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: config
+              mountPath: /CLIProxyAPI/config.yaml
+              subPath: config.yaml
+            - name: data
+              mountPath: /root/.cli-proxy-api
+              subPath: auths
+            - name: data
+              mountPath: /CLIProxyAPI/logs
+              subPath: logs
+      volumes:
+        - name: config
+          secret:
+            secretName: "{{ include "aiapi.fullname" . }}"
+            items:
+              - key: cliproxyapi-config.yaml
+                path: config.yaml
+        - name: data
+          {{- if .Values.cliproxyapi.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: "{{ include "aiapi.fullname" . }}-cliproxyapi"
+          {{- else }}
+          emptyDir: {}
+          {{- end }}

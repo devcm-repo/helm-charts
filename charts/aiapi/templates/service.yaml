@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ include "aiapi.fullname" . }}-newapi"
+  labels:
+    {{- include "aiapi.labels" . | nindent 4 }}
+    app.kubernetes.io/component: newapi
+  {{- with .Values.newapi.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.newapi.service.type }}
+  selector:
+    {{- include "aiapi.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: newapi
+  ports:
+    - name: http
+      port: {{ .Values.newapi.service.port }}
+      targetPort: http
+      protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ include "aiapi.fullname" . }}-cliproxyapi"
+  labels:
+    {{- include "aiapi.labels" . | nindent 4 }}
+    app.kubernetes.io/component: cliproxyapi
+  {{- with .Values.cliproxyapi.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.cliproxyapi.service.type }}
+  selector:
+    {{- include "aiapi.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: cliproxyapi
+  ports:
+    - name: http
+      port: {{ .Values.cliproxyapi.service.port }}
+      targetPort: http
+      protocol: TCP
