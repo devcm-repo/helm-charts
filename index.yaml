@@ -300,4 +300,26 @@ entries:
     urls:
     - https://github.com/devcm-repo/helm-charts/releases/download/tailscale-derp-0.0.1/tailscale-derp-0.0.1.tgz
     version: 0.0.1
-generated: "2026-05-01T14:34:34.796152116Z"
+  website:
+  - apiVersion: v2
+    appVersion: 0.0.1
+    created: "2026-08-24T07:31:11.798742235Z"
+    dependencies:
+    - name: common
+      repository: https://bjw-s-labs.github.io/helm-charts
+      version: 5.0.1
+    description: Fillcode website Helm Chart
+    digest: a86c297db1a41f8e06462e68c0e2e40c127c6f927b15eae40573cd6fe3dc7b23
+    home: https://fillcode.com
+    kubeVersion: '>=1.31.0-0'
+    maintainers:
+    - email: admin@dev.cm
+      name: dev.cm
+    name: website
+    sources:
+    - https://git.dev.cm/fillcode.com/website
+    type: application
+    urls:
+    - https://github.com/devcm-repo/helm-charts/releases/download/website-0.0.1/website-0.0.1.tgz
+    version: 0.0.1
+generated: "2026-08-24T07:31:11.798781769Z"
