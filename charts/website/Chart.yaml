@@ -1,0 +1,17 @@
+apiVersion: v2
+name: website
+description: Fillcode website Helm Chart
+type: application
+version: 0.0.1
+appVersion: "0.0.1"
+kubeVersion: ">=1.31.0-0"
+home: https://fillcode.com
+sources:
+  - https://git.dev.cm/fillcode.com/website
+maintainers:
+  - name: dev.cm
+    email: admin@dev.cm
+dependencies:
+  - name: common
+    version: 5.0.1
+    repository: https://bjw-s-labs.github.io/helm-charts
