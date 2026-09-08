@@ -2,8 +2,8 @@ apiVersion: v2
 name: website
 description: Fillcode website Helm Chart
 type: application
-version: 0.0.5
-appVersion: "0.0.5"
+version: 0.0.6
+appVersion: "0.0.6"
 kubeVersion: ">=1.31.0-0"
 home: https://fillcode.com
 sources:
