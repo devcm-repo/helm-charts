@@ -1,0 +1,30 @@
+{{- if .Values.nginx.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ include "aiapi.fullname" . }}-nginx"
+  labels:
+    {{- include "aiapi.labels" . | nindent 4 }}
+    app.kubernetes.io/component: nginx
+data:
+  {{- range $path, $_ := .Files.Glob "files/nginx/*.conf" }}
+  {{ base $path }}: |
+    {{- tpl ($.Files.Get $path) $ | nindent 4 }}
+  {{- end }}
+  aiapi.models.js: |
+    {{- .Files.Get "files/nginx/aiapi.models.js" | nindent 4 }}
+  cliproxyapi.htpasswd: ""
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ include "aiapi.fullname" . }}-nginx-site"
+  labels:
+    {{- include "aiapi.labels" . | nindent 4 }}
+    app.kubernetes.io/component: nginx
+data:
+  {{- range $path, $_ := .Files.Glob "files/nginx/www/**" }}
+  {{ base $path }}: |
+    {{- $.Files.Get $path | nindent 4 }}
+  {{- end }}
+{{- end }}

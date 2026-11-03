@@ -1,0 +1,13 @@
+# Copy to values.local.yaml; keep credentials out of Git.
+publicUrl: https://aiapi.eshetang.com
+newapi:
+  sessionSecret: "<reuse NEWAPI_SESSION_SECRET>"
+  ingress:
+    tlsSecretName: aiapi-tls
+nginx:
+  basicAuthSecretName: aiapi-nginx-auth
+postgresql:
+  auth:
+    password: "<database password>"
+# Pass the existing CPA config with --set-file cliproxyapi.config=/path/to/config.yaml.
+# For a custom CPA build, also set cliproxyapi.image and plugin extraEnv.

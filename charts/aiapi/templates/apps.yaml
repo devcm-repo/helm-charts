@@ -1,0 +1,91 @@
+{{- $fullname := include "aiapi.fullname" . -}}
+{{- $controllers := dict -}}
+{{- $services := dict -}}
+{{- $volumes := dict -}}
+{{- $secretChecksum := include (print $.Template.BasePath "/secret.yaml") . | sha256sum -}}
+{{- $apps := dict "newapi" .Values.newapi "cliproxyapi" .Values.cliproxyapi -}}
+{{- if .Values.nginx.enabled -}}
+  {{- $_ := set $apps "nginx" (merge (dict "replicas" 1 "port" 8080 "service" (dict "port" 8080 "type" "ClusterIP")) .Values.nginx) -}}
+{{- end -}}
+
+{{- range $name, $app := $apps -}}
+  {{- $labels := dict "app.kubernetes.io/component" $name -}}
+  {{- $env := concat (list (dict "name" "TZ" "value" $.Values.tz)) ($app.extraEnv | default list) -}}
+  {{- if eq $name "newapi" -}}
+    {{- $env = include "aiapi.newapiEnv" $ | fromYamlArray -}}
+  {{- end -}}
+  {{- $probeSpec := dict "tcpSocket" (dict "port" "http") -}}
+  {{- if eq $name "nginx" -}}
+    {{- $probeSpec = dict "httpGet" (dict "path" "/_nginx_health" "port" "http") -}}
+  {{- end -}}
+  {{- $probe := dict "enabled" true "custom" true "spec" $probeSpec -}}
+  {{- $container := dict "image" $app.image "env" $env "resources" $app.resources
+        "ports" (list (dict "name" "http" "containerPort" $app.port "protocol" "TCP"))
+        "probes" (dict "readiness" $probe "liveness" $probe) -}}
+  {{- $annotations := merge (dict "checksum/secret" $secretChecksum) (deepCopy $.Values.podAnnotations) -}}
+  {{- $pod := dict "annotations" $annotations -}}
+  {{- if eq $name "nginx" -}}
+    {{- $_ := set $annotations "checksum/config" (include (print $.Template.BasePath "/nginx-configmap.yaml") $ | sha256sum) -}}
+    {{- $_ := set $pod "automountServiceAccountToken" false -}}
+  {{- end -}}
+  {{- $_ := set $controllers $name (dict
+        "type" "deployment" "forceRename" (printf "%s-%s" $fullname $name)
+        "replicas" $app.replicas "revisionHistoryLimit" 10
+        "strategy" (ternary "RollingUpdate" "Recreate" (eq $name "nginx"))
+        "labels" $labels "pod" $pod "containers" (dict $name $container)) -}}
+  {{- $_ := set $services $name (dict
+        "controller" $name "forceRename" (printf "%s-%s" $fullname $name)
+        "type" $app.service.type "labels" $labels "annotations" ($app.service.annotations | default dict)
+        "ports" (dict "http" (dict "port" $app.service.port "targetPort" "http"))) -}}
+  {{- if ne $name "nginx" -}}
+    {{- $mounts := list (dict "path" "/data" "subPath" "data") (dict "path" "/app/logs" "subPath" "logs") -}}
+    {{- if eq $name "cliproxyapi" -}}
+      {{- $mounts = list (dict "path" "/root/.cli-proxy-api" "subPath" "auths")
+            (dict "path" "/CLIProxyAPI/logs" "subPath" "logs") (dict "path" "/CLIProxyAPI/plugins" "subPath" "plugins") -}}
+    {{- end -}}
+    {{- $_ := set $volumes (printf "%s-data" $name) (dict
+          "type" (ternary "persistentVolumeClaim" "emptyDir" $app.persistence.enabled)
+          "forceRename" (printf "%s-%s" $fullname $name) "retain" false
+          "size" $app.persistence.size "accessMode" $.Values.persistence.accessMode
+          "storageClass" $.Values.persistence.storageClass "annotations" $.Values.persistence.annotations "labels" $labels
+          "advancedMounts" (dict $name (dict $name $mounts))) -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $_ := set $volumes "cliproxyapi-config" (dict "type" "secret" "name" $fullname
+      "items" (list (dict "key" "cliproxyapi-config.yaml" "path" "config.yaml"))
+      "advancedMounts" (dict "cliproxyapi" (dict "cliproxyapi" (list
+        (dict "path" "/CLIProxyAPI/config.yaml" "subPath" "config.yaml"))))) -}}
+
+{{- if .Values.nginx.enabled -}}
+  {{- $siteItems := list -}}
+  {{- range $path, $_ := .Files.Glob "files/nginx/www/**" -}}
+    {{- $siteItems = append $siteItems (dict "key" (base $path) "path" (trimPrefix "files/nginx/www/" $path)) -}}
+  {{- end -}}
+  {{- $nginxVolumes := dict
+        "config" (dict "type" "configMap" "name" (printf "%s-nginx" $fullname) "mounts" (list
+          (dict "path" "/etc/nginx/nginx.conf" "subPath" "nginx.conf" "readOnly" true)
+          (dict "path" "/etc/nginx/conf.d" "readOnly" true)))
+        "site" (dict "type" "configMap" "name" (printf "%s-nginx-site" $fullname) "items" $siteItems
+          "mounts" (list (dict "path" "/usr/share/nginx/html/aiapi" "readOnly" true)))
+        "cpa-config" (dict "type" "secret" "name" $fullname
+          "items" (list (dict "key" "cliproxyapi-config.yaml" "path" "cliproxyapi-config.yaml"))
+          "mounts" (list (dict "path" "/run/secrets" "readOnly" true)))
+        "basic-auth" (dict "type" (ternary "secret" "configMap" (not (empty .Values.nginx.basicAuthSecretName)))
+          "name" (default (printf "%s-nginx" $fullname) .Values.nginx.basicAuthSecretName)
+          "items" (list (dict "key" "cliproxyapi.htpasswd" "path" "cliproxyapi.htpasswd"))
+          "mounts" (list (dict "path" "/etc/nginx/htpasswd" "readOnly" true))) -}}
+  {{- range $name, $volume := $nginxVolumes -}}
+    {{- $_ := set $volume "advancedMounts" (dict "nginx" (dict "nginx" $volume.mounts)) -}}
+    {{- $_ := unset $volume "mounts" -}}
+    {{- $_ := set $volumes $name $volume -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $values := dict "common" .Values.common "nameOverride" .Values.nameOverride
+      "global" (dict "fullnameOverride" $fullname "createDefaultServiceAccount" false "templateEvaluation" (dict "passes" 0))
+      "defaultPodOptions" (dict "nodeSelector" .Values.nodeSelector "affinity" .Values.affinity
+        "imagePullSecrets" .Values.imagePullSecrets "automountServiceAccountToken" true "enableServiceLinks" true)
+      "controllers" $controllers "service" $services "persistence" $volumes -}}
+{{- $context := merge (dict "Values" $values) (omit . "Values") -}}
+{{- include "bjw-s.common.loader.all" $context -}}

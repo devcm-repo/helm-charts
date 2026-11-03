@@ -1,0 +1,27 @@
+image:
+  repository: ghcr.io/sagernet/sing-box
+  tag: v1.14.4
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+
+# Create this Secret with a config.json key before installing.
+configSecretName: sing-box-config
+port: 54321
+
+service:
+  type: ClusterIP
+
+# TLS is terminated by the Ingress; keep the existing /vws path.
+ingress:
+  enabled: false
+  className: ""
+  host: ""
+  path: /vws
+  annotations: {}
+  tls: []
+
+nodeSelector: {}
+affinity: {}
+tolerations: []
+resources: {}

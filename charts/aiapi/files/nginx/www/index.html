@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIAPI Agent 接入文档</title>
+  <meta name="description" content="AIAPI 面向 Codex、Claude Code 和 Agent 应用的接入文档。">
+  <link rel="icon" type="image/png" href="https://m.eshetang.com/static/images/assets/images/logo.png">
+  <link rel="apple-touch-icon" href="https://m.eshetang.com/static/images/assets/images/logo.png">
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="assets/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <a class="brand" data-site-link="/doc/" href="/doc/" aria-label="AIAPI 文档首页">
+        <img src="https://m.eshetang.com/static/images/assets/images/logo.png" alt="AIAPI">
+        <span>AIAPI Docs</span>
+      </a>
+      <nav class="nav" aria-label="页面导航">
+        <a href="#install">安装脚本</a>
+        <a href="#clients">客户端</a>
+        <a href="#agents">Agent 应用</a>
+        <a data-site-link="/keys" href="/keys">获取 Key</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="shell hero-grid">
+        <div>
+          <p class="eyebrow">OpenAI-compatible Gateway</p>
+          <h1>AIAPI 接入 Agent 客户端</h1>
+          <p class="lead">AIAPI 为编码 Agent 提供统一网关。Codex 使用 OpenAI Responses 协议，Claude Code 使用 Anthropic Messages 协议，密钥与额度都在 AIAPI 后台统一管理。</p>
+          <div class="hero-actions">
+            <a class="button primary" href="#install">选择客户端</a>
+            <a class="button" data-site-link="/keys" href="/keys">获取 API Key</a>
+          </div>
+        </div>
+
+        <aside class="signal-panel" aria-label="AIAPI 接入摘要">
+          <div class="signal-head">
+            <span>Agent Gateway</span>
+            <strong>AIAPI</strong>
+          </div>
+          <div class="signal-list">
+            <div>
+              <span>当前站点</span>
+              <strong data-site-origin>当前 Host</strong>
+            </div>
+            <div>
+              <span>已接入</span>
+              <strong>Codex / Claude Code</strong>
+            </div>
+            <div>
+              <span>脚本入口</span>
+              <strong>/getstart/&lt;script&gt;</strong>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="install" class="section">
+      <div class="shell">
+        <div class="section-head">
+          <h2>安装脚本</h2>
+          <p>选择你的客户端并复制命令。页面会根据当前访问域名自动生成安装地址，不需要在文档里写死站点 URL。</p>
+        </div>
+
+        <div class="client-grid" data-client-grid></div>
+
+        <p class="hint">批量配置时可以提前设置 <code>EST_API_KEY</code>。脚本也支持 <code>EST_MODEL</code>、<code>EST_API_BASE_URL</code>、<code>EST_ANTHROPIC_BASE_URL</code> 和客户端专用 Home 目录变量。</p>
+      </div>
+    </section>
+
+    <section id="clients" class="section">
+      <div class="shell">
+        <div class="section-head">
+          <h2>客户端配置摘要</h2>
+          <p>页面只展示关键结果，具体文件写入由脚本处理并自动备份。</p>
+        </div>
+
+        <div class="summary-grid">
+          <article class="summary-card">
+            <span>Codex</span>
+            <strong>OpenAI Responses</strong>
+            <p>配置 provider、base URL、默认模型和 API Key。</p>
+          </article>
+          <article class="summary-card">
+            <span>Claude Code</span>
+            <strong>Anthropic Messages</strong>
+            <p>配置 <code>ANTHROPIC_BASE_URL</code> 和 <code>ANTHROPIC_AUTH_TOKEN</code>。</p>
+          </article>
+          <article class="summary-card">
+            <span>安全</span>
+            <strong>自动备份</strong>
+            <p>修改本地配置前都会生成带时间戳的备份。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="shell">
+        <div class="section-head">
+          <h2>接入流程</h2>
+          <p>不同客户端协议不同，但都使用同一个 AIAPI Key 和当前站点作为网关入口。</p>
+        </div>
+
+        <div class="steps">
+          <article class="step">
+            <h3>获取 Key</h3>
+            <p>打开 AIAPI 后台，创建或复制你的 API Key。</p>
+          </article>
+          <article class="step">
+            <h3>执行脚本</h3>
+            <p>按系统复制上方命令，脚本会交互式询问密钥。</p>
+          </article>
+          <article class="step">
+            <h3>重启客户端</h3>
+            <p>如果客户端正在运行，重启后会加载新的网关配置。</p>
+          </article>
+          <article class="step">
+            <h3>开始使用</h3>
+            <p>后续客户端请求会走当前 AIAPI 站点。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="agents" class="section">
+      <div class="shell">
+        <div class="section-head">
+          <h2>其他 Agent 应用</h2>
+          <p>支持 OpenAI-compatible 或 Anthropic-compatible 配置的客户端，通常只需要填入 Base URL、API Key 和模型名。</p>
+        </div>
+
+        <div class="summary-grid">
+          <article class="summary-card">
+            <span>Base URL</span>
+            <strong data-site-origin>当前 Host</strong>
+            <p>OpenAI-compatible 客户端通常使用 <code>/v1</code>，Anthropic-compatible 客户端使用站点根地址。</p>
+          </article>
+          <article class="summary-card">
+            <span>API Key</span>
+            <strong>EST_API_KEY</strong>
+            <p>建议通过环境变量或客户端密钥管理功能保存。</p>
+          </article>
+          <article class="summary-card">
+            <span>Model</span>
+            <strong>gpt-5.6-sol</strong>
+            <p>后台开放更多模型后，可在客户端模型字段切换。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="shell">AIAPI Docs · <span data-site-doc-url>/doc/</span></div>
+  </footer>
+</body>
+</html>

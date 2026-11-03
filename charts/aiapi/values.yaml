@@ -1,4 +1,6 @@
 tz: Asia/Shanghai
+# Single public address for the frontend and Ingress host.
+publicUrl: https://aiapi.eshetang.com
 
 global:
   defaultStorageClass: ""
@@ -16,6 +18,17 @@ persistence:
   accessMode: ReadWriteOnce
   annotations: {}
 
+nginx:
+  enabled: true
+  image:
+    repository: nginx
+    # Debian official image includes ngx_http_js_module with QuickJS.
+    tag: "1.30.6"
+    pullPolicy: IfNotPresent
+  # Secret key: cliproxyapi.htpasswd. Empty denies all management UI logins.
+  basicAuthSecretName: ""
+  resources: {}
+
 newapi:
   replicas: 1
   image:
@@ -23,7 +36,8 @@ newapi:
     tag: latest
     pullPolicy: IfNotPresent
   port: 3000
-  frontendBaseUrl: https://aiapi.dev.cm
+  # Optional legacy override; normally use publicUrl above.
+  frontendBaseUrl: ""
   sessionSecret: change-me
   # Deprecated: use newapi.database.dsn or newapi.database.existingSecret.
   sqlDsn: ""
@@ -50,6 +64,14 @@ newapi:
       value: "1000"
     - name: RELAY_MAX_IDLE_CONNS_PER_HOST
       value: "200"
+    - name: RELAY_TIMEOUT
+      value: "0"
+    - name: STREAMING_TIMEOUT
+      value: "300"
+    - name: GLOBAL_WEB_RATE_LIMIT
+      value: "180"
+    - name: GLOBAL_API_RATE_LIMIT
+      value: "360"
   resources: {}
   persistence:
     enabled: true
@@ -59,12 +81,16 @@ newapi:
     port: 3000
     annotations: {}
   ingress:
+    # Public entry targets nginx when nginx.enabled is true.
     enabled: true
     className: ""
-    host: aiapi.dev.cm
+    # Empty derives the host from publicUrl.
+    host: ""
     path: /
     pathType: Prefix
     annotations: {}
+    # Creates the TLS hosts list automatically; existing tls also remains supported.
+    tlsSecretName: ""
     tls: []
 
 cliproxyapi:
@@ -74,6 +100,8 @@ cliproxyapi:
     tag: latest
     pullPolicy: IfNotPresent
   port: 8080
+  # Use valueFrom.secretKeyRef for credentials required by custom CPA plugins.
+  extraEnv: []
   resources: {}
   persistence:
     enabled: true

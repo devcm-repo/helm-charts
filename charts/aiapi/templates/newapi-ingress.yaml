@@ -17,16 +17,23 @@ spec:
   {{- with .Values.newapi.ingress.tls }}
   tls:
     {{- toYaml . | nindent 4 }}
+  {{- else }}
+  {{- if .Values.newapi.ingress.tlsSecretName }}
+  tls:
+    - secretName: {{ .Values.newapi.ingress.tlsSecretName | quote }}
+      hosts:
+        - {{ include "aiapi.publicHost" . | quote }}
+  {{- end }}
   {{- end }}
   rules:
-    - host: {{ .Values.newapi.ingress.host }}
+    - host: {{ include "aiapi.publicHost" . | quote }}
       http:
         paths:
           - path: {{ .Values.newapi.ingress.path }}
             pathType: {{ .Values.newapi.ingress.pathType }}
             backend:
               service:
-                name: "{{ include "aiapi.fullname" . }}-newapi"
+                name: "{{ include "aiapi.fullname" . }}-{{ ternary "nginx" "newapi" .Values.nginx.enabled }}"
                 port:
-                  number: {{ .Values.newapi.service.port }}
+                  number: {{ ternary 8080 (int .Values.newapi.service.port) .Values.nginx.enabled }}
 {{- end }}

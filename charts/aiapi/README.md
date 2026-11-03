@@ -1,70 +1,70 @@
-# aiapi
+# aiapi Helm Chart
 
-Deploys New API and CLIProxyAPI. PostgreSQL and Valkey are provided through upstream Bitnami Helm chart dependencies by default.
+This Helm Chart deploys New API, CLIProxyAPI (CPA), and an nginx/njs gateway, with optional PostgreSQL and Valkey. Requires Kubernetes 1.31 or later.
+
+## Installing the Helm Chart
+
+Run from the repository root, with your CPA configuration in `config.yaml`:
 
 ```shell
-helm dependency update ./charts/aiapi
-helm install aiapi ./charts/aiapi
+helm dependency build charts/aiapi
+helm install aiapi charts/aiapi --namespace aiapi --create-namespace \
+  -f values.yaml --set-file cliproxyapi.config=./config.yaml
 ```
 
-For production, override at least:
+Prepare the TLS Secret and optional Basic Auth Secret in the `aiapi` namespace. The Basic Auth Secret must contain `cliproxyapi.htpasswd`. CPA configuration is read-only; update it through Helm.
 
-- `newapi.sessionSecret`
-- `postgresql.auth.password`
-- `cliproxyapi.config`
-- `newapi.frontendBaseUrl`
+## Helm Chart Configuration Examples
 
-Use the bundled dependencies:
+A working configuration (replace the placeholder secrets):
 
 ```yaml
-postgresql:
-  enabled: true
-  auth:
-    username: newapi
-    password: change-me
-    database: newapi
-
-valkey:
-  enabled: true
-  architecture: standalone
-  auth:
-    enabled: false
-```
-
-Use external PostgreSQL and Valkey/Redis by disabling the dependencies and providing the New API environment variables as values:
-
-```yaml
-postgresql:
-  enabled: false
-valkey:
-  enabled: false
+publicUrl: https://aiapi.eshetang.com
 
 newapi:
-  database:
-    dsn: postgres://newapi:password@postgres.example.com:5432/newapi?sslmode=require
-  cache:
-    redisConnString: redis://:password@valkey.example.com:6379/0
-```
+  sessionSecret: "<session-secret>"
+  ingress:
+    className: nginx
+    tlsSecretName: aiapi-tls
 
-For production, prefer storing the complete connection strings in an existing Kubernetes Secret:
+nginx:
+  basicAuthSecretName: aiapi-nginx-auth
 
-```yaml
 postgresql:
-  enabled: false
-valkey:
-  enabled: false
+  auth:
+    password: "<database-password>"
 
-newapi:
-  database:
-    existingSecret:
-      name: aiapi-external-connections
-      key: SQL_DSN
-  cache:
-    existingSecret:
-      name: aiapi-external-connections
-      key: REDIS_CONN_STRING
+nodeSelector:
+  topology.kubernetes.io/region: cn-hk
 ```
 
-`newapi.database.*` renders `SQL_DSN`; `newapi.cache.*` renders `REDIS_CONN_STRING`. The older `newapi.sqlDsn` and `newapi.redisConnString` values still work for compatibility.
+The gateway serves `/doc/`, `/getstart/*`, `/cpa/*`, and `/v1/codex/models`. Remote CPA management also requires `remote-management.allow-remote: true` and a management key in `config.yaml`.
 
-`cliproxyapi.ingress` is disabled by default. If exposing it under `/cpa`, add the rewrite annotations required by your Ingress controller and set `remote-management.allow-remote` in `cliproxyapi.config` intentionally.
+## Helm Chart Values
+
+| Key | Description | Default |
+|---|---|---|
+| `publicUrl` | Public URL; also determines the Ingress host. | `https://aiapi.eshetang.com` |
+| `nginx.enabled` | Enable the nginx/njs gateway. | `true` |
+| `nginx.basicAuthSecretName` | Existing Basic Auth Secret; empty denies management UI login. | `""` |
+| `newapi.image.repository` | New API container image repository. | `calciumion/new-api` |
+| `newapi.sessionSecret` | Session secret; replace before deployment. | `change-me` |
+| `newapi.ingress.enabled` | Enable the shared public Ingress. | `true` |
+| `newapi.ingress.className` | IngressClass name. | `""` |
+| `newapi.ingress.tlsSecretName` | TLS Secret; hosts are derived automatically. | `""` |
+| `newapi.ingress.annotations` | Controller-specific body size, streaming and timeout settings. | `{}` |
+| `newapi.database.existingSecret.name` | Existing Secret containing `SQL_DSN`; disable bundled PostgreSQL. | `""` |
+| `newapi.cache.existingSecret.name` | Existing Secret containing `REDIS_CONN_STRING`; disable bundled Valkey. | `""` |
+| `cliproxyapi.image.repository` | CPA container image repository. | `eceasy/cli-proxy-api` |
+| `cliproxyapi.config` | CPA YAML configuration; accepts `--set-file`. | See [values.yaml](values.yaml) |
+| `cliproxyapi.extraEnv` | Additional CPA environment variables and Secret references. | `[]` |
+| `postgresql.enabled` | Deploy bundled PostgreSQL. | `true` |
+| `postgresql.auth.password` | PostgreSQL user password; replace before deployment. | `change-me` |
+| `valkey.enabled` | Deploy bundled Valkey. | `true` |
+| `newapi.persistence.size` | New API data/log volume size. | `2Gi` |
+| `cliproxyapi.persistence.size` | CPA auth/log/plugin volume size. | `1Gi` |
+| `persistence.storageClass` | StorageClass for application volumes. | `""` |
+| `nodeSelector` | Node labels for the application Pods. | `{}` |
+| `affinity` | Node/Pod affinity rules for the application Pods. | `{}` |
+
+See [values.yaml](values.yaml) for all options. Uninstalling this chart deletes its New API/CPA PVCs; back up data first.
