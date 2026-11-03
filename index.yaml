@@ -3,6 +3,35 @@ entries:
   aiapi:
   - apiVersion: v2
     appVersion: latest
+    created: "2026-11-03T10:33:36.747562529Z"
+    dependencies:
+    - name: common
+      repository: oci://ghcr.io/bjw-s-labs/helm
+      version: 5.3.0
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 18.6.2
+    - condition: valkey.enabled
+      name: valkey
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 5.4.11
+    description: New API, CLIProxyAPI and nginx/njs gateway Helm Chart
+    digest: abb7e04467dd6ea17f3e70bbde913b020d7398dc44409bf6b29a7200d499ca9c
+    home: https://devcm-repo.github.io/helm-charts/
+    kubeVersion: '>=1.31.0-0'
+    maintainers:
+    - email: admin@dev.cm
+      name: dev.cm
+      url: https://github.com/devcm-repo
+    name: aiapi
+    sources:
+    - https://github.com/devcm-repo/helm-charts
+    urls:
+    - https://github.com/devcm-repo/helm-charts/releases/download/aiapi-0.0.3/aiapi-0.0.3.tgz
+    version: 0.0.3
+  - apiVersion: v2
+    appVersion: latest
     created: "2026-05-01T14:34:34.79612822Z"
     dependencies:
     - condition: postgresql.enabled
@@ -129,6 +158,20 @@ entries:
     urls:
     - https://github.com/devcm-repo/helm-charts/releases/download/rustdesk-server-0.0.2/rustdesk-server-0.0.2.tgz
     version: 0.0.2
+  sing-box:
+  - apiVersion: v2
+    appVersion: 1.14.4
+    created: "2026-11-03T10:33:37.314204634Z"
+    description: Minimal VLESS over WebSocket server, replacing docker/proxy Xray
+    digest: 91f656ee70606f4b8973705c1c4484af35314fbde20a241e9195dde4a30f27a2
+    home: https://sing-box.sagernet.org/
+    name: sing-box
+    sources:
+    - https://github.com/SagerNet/sing-box
+    type: application
+    urls:
+    - https://github.com/devcm-repo/helm-charts/releases/download/sing-box-0.0.1/sing-box-0.0.1.tgz
+    version: 0.0.1
   tailscale-derp:
   - apiVersion: v2
     appVersion: v1.90.6
@@ -469,4 +512,4 @@ entries:
     urls:
     - https://github.com/devcm-repo/helm-charts/releases/download/website-0.0.1/website-0.0.1.tgz
     version: 0.0.1
-generated: "2026-10-31T05:55:53.853158617Z"
+generated: "2026-11-03T10:33:37.836083996Z"
