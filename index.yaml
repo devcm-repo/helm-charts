@@ -358,6 +358,27 @@ entries:
     version: 0.0.1
   website:
   - apiVersion: v2
+    appVersion: 0.0.9
+    created: "2026-11-04T09:31:20.030723604Z"
+    dependencies:
+    - name: common
+      repository: https://bjw-s-labs.github.io/helm-charts
+      version: 5.0.1
+    description: Fillcode website Helm Chart
+    digest: cd522637a6a6e210837b6e211f0f1cd6c0181aebe1d47c0bad339937b708b142
+    home: https://fillcode.com
+    kubeVersion: '>=1.31.0-0'
+    maintainers:
+    - email: admin@dev.cm
+      name: dev.cm
+    name: website
+    sources:
+    - https://git.dev.cm/fillcode.com/website
+    type: application
+    urls:
+    - https://github.com/devcm-repo/helm-charts/releases/download/website-0.0.9/website-0.0.9.tgz
+    version: 0.0.9
+  - apiVersion: v2
     appVersion: 0.0.8
     created: "2026-10-31T05:55:53.853117265Z"
     dependencies:
@@ -525,4 +546,4 @@ entries:
     urls:
     - https://github.com/devcm-repo/helm-charts/releases/download/website-0.0.1/website-0.0.1.tgz
     version: 0.0.1
-generated: "2026-11-04T02:45:13.415763522Z"
+generated: "2026-11-04T09:31:20.030815907Z"
