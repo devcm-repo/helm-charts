@@ -42,6 +42,8 @@ For WebSocket Early Data, set `max_early_data: 2048` and `early_data_header_name
 
 To also serve Hysteria2, enable `hysteria2.enabled` and set `hysteria2.tlsSecretName` to a cert-manager TLS Secret. Configure a Hysteria2 inbound on UDP `443`, with `certificate_path: /etc/sing-box-tls/tls.crt` and `key_path: /etc/sing-box-tls/tls.key`. UDP uses a host port on each selected node; keep it free and reachable. TCP WebSocket traffic continues through the Ingress.
 
+For a 1280-byte Pod MTU, set `initial_packet_size: 1200` in the Hysteria2 inbound to keep QUIC handshakes within the available MTU.
+
 For a separate cert-manager certificate, add `cert-manager.io/cluster-issuer: dnspod` to annotations and set `ingress.tls[].secretName` in the same namespace. With `kind: Deployment`, use `replicaCount` to scale and anti-affinity to guarantee separate nodes. Interrupted connections require client reconnection.
 
 ## Helm Chart Values
