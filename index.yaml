@@ -161,6 +161,19 @@ entries:
   sing-box:
   - apiVersion: v2
     appVersion: 1.14.4
+    created: "2026-11-04T02:45:13.056162936Z"
+    description: Minimal VLESS over WebSocket server, replacing docker/proxy Xray
+    digest: e0d37930ed339a2294177d665273b85c6e197bf0b3f0a2365a77afd57a73fac9
+    home: https://sing-box.sagernet.org/
+    name: sing-box
+    sources:
+    - https://github.com/SagerNet/sing-box
+    type: application
+    urls:
+    - https://github.com/devcm-repo/helm-charts/releases/download/sing-box-0.0.2/sing-box-0.0.2.tgz
+    version: 0.0.2
+  - apiVersion: v2
+    appVersion: 1.14.4
     created: "2026-11-03T10:33:37.314204634Z"
     description: Minimal VLESS over WebSocket server, replacing docker/proxy Xray
     digest: 91f656ee70606f4b8973705c1c4484af35314fbde20a241e9195dde4a30f27a2
@@ -512,4 +525,4 @@ entries:
     urls:
     - https://github.com/devcm-repo/helm-charts/releases/download/website-0.0.1/website-0.0.1.tgz
     version: 0.0.1
-generated: "2026-11-03T10:33:37.836083996Z"
+generated: "2026-11-04T02:45:13.415763522Z"
