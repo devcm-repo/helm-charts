@@ -3,6 +3,7 @@ image:
   tag: v1.14.4
   pullPolicy: IfNotPresent
 
+kind: Deployment
 replicaCount: 1
 
 # Create this Secret with a config.json key before installing.
@@ -11,6 +12,12 @@ port: 54321
 
 service:
   type: ClusterIP
+  internalTrafficPolicy: Cluster
+
+hysteria2:
+  enabled: false
+  port: 443
+  tlsSecretName: ""
 
 # TLS is terminated by the Ingress; keep the existing /vws path.
 ingress:

@@ -2,7 +2,7 @@ apiVersion: v2
 name: sing-box
 description: Minimal VLESS over WebSocket server, replacing docker/proxy Xray
 type: application
-version: 0.0.1
+version: 0.0.2
 appVersion: "1.14.4"
 home: https://sing-box.sagernet.org/
 sources:

@@ -14,30 +14,35 @@ helm install proxy charts/sing-box --namespace proxy -f values.yaml
 
 ## Helm Chart Configuration Examples
 
-A working configuration using the controller's default TLS certificate for `*.node.dev.cm`. The snippet requires ingress-nginx with snippet annotations enabled.
+A node-local proxy on each labeled node, using the controller's default TLS certificate for `*.dev.com`. The snippet requires ingress-nginx with snippet annotations enabled.
 
 ```yaml
-replicaCount: 2
+kind: DaemonSet
+
+service:
+  internalTrafficPolicy: Local
 
 ingress:
   enabled: true
   className: nginx
-  host: "*.node.dev.cm"
+  host: "*.dev.com"
   annotations:
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      if ($http_upgrade != "websocket") {
-        return 404;
-      }
+    nginx.ingress.kubernetes.io/service-upstream: "true"
+    nginx.ingress.kubernetes.io/configuration-snippet: 'if ($http_upgrade != "websocket") { return 404; }'
   tls:
-    - hosts: ["*.node.dev.cm"]
+    - hosts: ["*.dev.com"]
 
 nodeSelector:
-  topology.kubernetes.io/region: cn-hk
+  devcm-proxy/enabled: "true"
 ```
 
-For a separate cert-manager certificate, add `cert-manager.io/cluster-issuer: dnspod` to annotations and set `ingress.tls[].secretName` in the same namespace. Multiple replicas need anti-affinity for guaranteed placement on separate nodes; interrupted connections require client reconnection.
+For WebSocket Early Data, set `max_early_data: 2048` and `early_data_header_name: "Sec-WebSocket-Protocol"` in the server's WebSocket transport.
+
+To also serve Hysteria2, enable `hysteria2.enabled` and set `hysteria2.tlsSecretName` to a cert-manager TLS Secret. Configure a Hysteria2 inbound on UDP `443`, with `certificate_path: /etc/sing-box-tls/tls.crt` and `key_path: /etc/sing-box-tls/tls.key`. UDP uses a host port on each selected node; keep it free and reachable. TCP WebSocket traffic continues through the Ingress.
+
+For a separate cert-manager certificate, add `cert-manager.io/cluster-issuer: dnspod` to annotations and set `ingress.tls[].secretName` in the same namespace. With `kind: Deployment`, use `replicaCount` to scale and anti-affinity to guarantee separate nodes. Interrupted connections require client reconnection.
 
 ## Helm Chart Values
 
@@ -46,10 +51,15 @@ For a separate cert-manager certificate, add `cert-manager.io/cluster-issuer: dn
 | `image.repository` | Container image repository. | `ghcr.io/sagernet/sing-box` |
 | `image.tag` | Container image tag. | `v1.14.4` |
 | `image.pullPolicy` | Kubernetes image pull policy. | `IfNotPresent` |
-| `replicaCount` | Number of Deployment replicas. | `1` |
+| `kind` | Workload type: `Deployment` or `DaemonSet`. | `Deployment` |
+| `replicaCount` | Number of replicas; only used with `kind: Deployment`. | `1` |
 | `configSecretName` | Existing Secret containing `config.json`. | `sing-box-config` |
 | `port` | Proxy port; must match the sing-box listener. | `54321` |
 | `service.type` | Kubernetes Service type. | `ClusterIP` |
+| `service.internalTrafficPolicy` | `Cluster` for all backends, or `Local` for node-local backends. | `Cluster` |
+| `hysteria2.enabled` | Expose Hysteria2 on a node UDP host port and mount its TLS Secret. | `false` |
+| `hysteria2.port` | UDP listener and host port; must match `config.json`. | `443` |
+| `hysteria2.tlsSecretName` | Existing TLS Secret mounted at `/etc/sing-box-tls`. | `""` |
 | `ingress.enabled` | Enable the public Ingress. | `false` |
 | `ingress.className` | IngressClass name. | `""` |
 | `ingress.host` | Ingress hostname; required when enabled. | `""` |
@@ -61,4 +71,4 @@ For a separate cert-manager certificate, add `cert-manager.io/cluster-issuer: dn
 | `tolerations` | Tolerations for node taints. | `[]` |
 | `resources` | Container CPU/memory requests and limits. | `{}` |
 
-Update the configuration Secret and restart the Deployment to reload it. TLS certificate updates are handled by the Ingress Controller.
+Update the configuration Secret and restart the workload to reload it. TLS certificate updates are handled by the Ingress Controller.

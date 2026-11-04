@@ -1,9 +1,14 @@
+{{- if not (has .Values.kind (list "Deployment" "DaemonSet")) }}
+{{- fail "kind must be Deployment or DaemonSet" }}
+{{- end }}
 apiVersion: apps/v1
-kind: Deployment
+kind: {{ .Values.kind }}
 metadata:
   name: "{{ .Release.Name }}-{{ .Chart.Name }}"
 spec:
+  {{- if eq .Values.kind "Deployment" }}
   replicas: {{ .Values.replicaCount }}
+  {{- end }}
   selector:
     matchLabels:
       app: "{{ .Release.Name }}-{{ .Chart.Name }}"
@@ -33,6 +38,12 @@ spec:
           ports:
             - name: proxy
               containerPort: {{ .Values.port }}
+            {{- if .Values.hysteria2.enabled }}
+            - name: hysteria2
+              containerPort: {{ .Values.hysteria2.port }}
+              hostPort: {{ .Values.hysteria2.port }}
+              protocol: UDP
+            {{- end }}
           readinessProbe:
             tcpSocket:
               port: proxy
@@ -47,6 +58,11 @@ spec:
             - name: config
               mountPath: /etc/sing-box
               readOnly: true
+            {{- if .Values.hysteria2.enabled }}
+            - name: tls
+              mountPath: /etc/sing-box-tls
+              readOnly: true
+            {{- end }}
       volumes:
         - name: config
           secret:
@@ -54,3 +70,8 @@ spec:
             items:
               - key: config.json
                 path: config.json
+        {{- if .Values.hysteria2.enabled }}
+        - name: tls
+          secret:
+            secretName: {{ required "hysteria2.tlsSecretName is required when Hysteria2 is enabled" .Values.hysteria2.tlsSecretName | quote }}
+        {{- end }}
