@@ -55,6 +55,20 @@ entries:
     urls:
     - https://github.com/devcm-repo/helm-charts/releases/download/aiapi-0.0.2/aiapi-0.0.2.tgz
     version: 0.0.2
+  cortendesk:
+  - apiVersion: v2
+    appVersion: 1.21.1
+    created: "2026-11-05T05:09:35.025005699Z"
+    description: CortenDesk console, ID server and relay
+    digest: 7f5bd0689969f735eae8fae865e4b1aae2479c7fa08cd462d3ae6b0e8b0400c8
+    home: https://cortendesk.com
+    name: cortendesk
+    sources:
+    - https://github.com/marcpope/cortendesk
+    type: application
+    urls:
+    - https://github.com/devcm-repo/helm-charts/releases/download/cortendesk-0.0.1/cortendesk-0.0.1.tgz
+    version: 0.0.1
   rustdesk-server:
   - apiVersion: v2
     appVersion: latest
@@ -546,4 +560,4 @@ entries:
     urls:
     - https://github.com/devcm-repo/helm-charts/releases/download/website-0.0.1/website-0.0.1.tgz
     version: 0.0.1
-generated: "2026-11-04T09:31:20.030815907Z"
+generated: "2026-11-05T05:09:35.861585877Z"
