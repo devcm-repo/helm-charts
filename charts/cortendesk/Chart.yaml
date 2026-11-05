@@ -1,0 +1,9 @@
+apiVersion: v2
+name: cortendesk
+description: CortenDesk console, ID server and relay
+type: application
+version: 0.0.1
+appVersion: "1.21.1"
+home: https://cortendesk.com
+sources:
+  - https://github.com/marcpope/cortendesk

@@ -1,0 +1,31 @@
+image:
+  repository: ghcr.io/marcpope/cortendesk
+  tag: "1.21.1"
+  pullPolicy: IfNotPresent
+
+# Public console URL; also supplies the default ID and relay hostname.
+appUrl: ""
+env: []
+envFrom: []
+
+# Container ports stay fixed. Set CORTENDESK_ID_SERVER and
+# CORTENDESK_RELAY_SERVER through env when using different public ports.
+hostPorts:
+  nat: 21115
+  id: 21116
+  relay: 21117
+
+persistence:
+  storageClass: ""
+  size: 2Gi
+
+ingress:
+  enabled: false
+  className: ""
+  host: ""
+  annotations: {}
+  tls: []
+
+nodeSelector: {}
+podAnnotations: {}
+resources: {}

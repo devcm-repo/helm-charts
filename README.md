@@ -8,4 +8,4 @@ helm repo add devcm https://devcm-repo.github.io/helm-charts
 - aiapi
 - sing-box
 - tailscale-derp
-- rustdesk-server
+- cortendesk
