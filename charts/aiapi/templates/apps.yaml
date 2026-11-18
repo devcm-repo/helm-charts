@@ -52,11 +52,29 @@
     {{- $_ := set $annotations "checksum/config" (include (print $.Template.BasePath "/nginx-configmap.yaml") $ | sha256sum) -}}
     {{- $_ := set $pod "automountServiceAccountToken" false -}}
   {{- end -}}
+  {{- $updateStrategy := $app.updateStrategy | default (dict "type" "Recreate") -}}
+  {{- if eq $name "nginx" -}}
+    {{- $updateStrategy = dict "type" "RollingUpdate" -}}
+  {{- end -}}
+  {{- $waitForKvLock := and (eq $name "cliproxyapi") $app.waitForKvLock -}}
+  {{- $initContainers := dict -}}
+  {{- if $waitForKvLock -}}
+    {{- if or (not $app.persistence.enabled) (gt (int $app.replicas) 1) -}}
+      {{- fail "cliproxyapi.waitForKvLock requires persistent storage and at most one replica" -}}
+    {{- end -}}
+    {{- $maxSurge := get ($updateStrategy.rollingUpdate | default dict) "maxSurge" | toString -}}
+    {{- if and (eq $updateStrategy.type "RollingUpdate") (not (has $maxSurge (list "0" "0%"))) -}}
+      {{- fail "cliproxyapi.waitForKvLock requires maxSurge: 0 for rolling updates" -}}
+    {{- end -}}
+    {{- $wait := "if [ -f /auths/kv.db ]; then exec 9</auths/kv.db; flock -s -w 60 9; fi" -}}
+    {{- $_ := set $initContainers "wait-for-kv" (dict "image" $app.image "resources" $app.resources
+          "command" (list "/bin/sh" "-ec" $wait)) -}}
+  {{- end -}}
   {{- $_ := set $controllers $name (dict
         "type" "deployment" "forceRename" (printf "%s-%s" $fullname $name)
         "replicas" $app.replicas "revisionHistoryLimit" 10
-        "strategy" (ternary "RollingUpdate" "Recreate" (eq $name "nginx"))
-        "labels" $labels "pod" $pod "containers" $containers) -}}
+        "strategy" $updateStrategy.type "rollingUpdate" $updateStrategy.rollingUpdate
+        "labels" $labels "pod" $pod "containers" $containers "initContainers" $initContainers) -}}
   {{- $_ := set $services $name (dict
         "controller" $name "forceRename" (printf "%s-%s" $fullname $name)
         "type" $app.service.type "labels" $labels "annotations" ($app.service.annotations | default dict)
@@ -67,12 +85,16 @@
       {{- $mounts = list (dict "path" "/root/.cli-proxy-api" "subPath" "auths")
             (dict "path" "/CLIProxyAPI/logs" "subPath" "logs") (dict "path" "/CLIProxyAPI/plugins" "subPath" "plugins") -}}
     {{- end -}}
+    {{- $appMounts := dict $name $mounts -}}
+    {{- if $waitForKvLock -}}
+      {{- $_ := set $appMounts "wait-for-kv" (list (dict "path" "/auths" "subPath" "auths" "readOnly" true)) -}}
+    {{- end -}}
     {{- $_ := set $volumes (printf "%s-data" $name) (dict
           "type" (ternary "persistentVolumeClaim" "emptyDir" $app.persistence.enabled)
           "forceRename" (printf "%s-%s" $fullname $name) "retain" false
           "size" $app.persistence.size "accessMode" $.Values.persistence.accessMode
           "storageClass" $.Values.persistence.storageClass "annotations" $.Values.persistence.annotations "labels" $labels
-          "advancedMounts" (dict $name (dict $name $mounts))) -}}
+          "advancedMounts" (dict $name $appMounts)) -}}
   {{- end -}}
 {{- end -}}
 

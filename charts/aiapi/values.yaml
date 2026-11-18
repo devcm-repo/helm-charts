@@ -33,6 +33,8 @@ nginx:
 
 newapi:
   replicas: 1
+  updateStrategy:
+    type: Recreate
   image:
     repository: calciumion/new-api
     tag: latest
@@ -97,6 +99,10 @@ newapi:
 
 cliproxyapi:
   replicas: 1
+  updateStrategy:
+    type: Recreate
+  # Wait for the default local bbolt file to be unlocked before starting.
+  waitForKvLock: false
   image:
     repository: eceasy/cli-proxy-api
     tag: latest
