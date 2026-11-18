@@ -98,6 +98,10 @@ newapi:
     tls: []
 
 cliproxyapi:
+  # Empty inherits the chart-wide tz setting.
+  tz: ""
+  # Store a writable copy of the CPA config on its existing PVC.
+  writableConfig: false
   replicas: 1
   updateStrategy:
     type: Recreate

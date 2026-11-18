@@ -15,7 +15,8 @@
 
 {{- range $name, $app := $apps -}}
   {{- $labels := dict "app.kubernetes.io/component" $name -}}
-  {{- $env := concat (list (dict "name" "TZ" "value" $.Values.tz)) ($app.extraEnv | default list) -}}
+  {{- $tz := $app.tz | default $.Values.tz -}}
+  {{- $env := concat (list (dict "name" "TZ" "value" $tz)) ($app.extraEnv | default list) -}}
   {{- if eq $name "newapi" -}}
     {{- $env = include "aiapi.newapiEnv" $ | fromYamlArray -}}
   {{- end -}}
@@ -57,6 +58,7 @@
     {{- $updateStrategy = dict "type" "RollingUpdate" -}}
   {{- end -}}
   {{- $waitForKvLock := and (eq $name "cliproxyapi") $app.waitForKvLock -}}
+  {{- $writableConfig := and (eq $name "cliproxyapi") $app.writableConfig -}}
   {{- $initContainers := dict -}}
   {{- if $waitForKvLock -}}
     {{- if or (not $app.persistence.enabled) (gt (int $app.replicas) 1) -}}
@@ -69,6 +71,23 @@
     {{- $wait := "if [ -f /auths/kv.db ]; then exec 9</auths/kv.db; flock -s -w 60 9; fi" -}}
     {{- $_ := set $initContainers "wait-for-kv" (dict "image" $app.image "resources" $app.resources
           "command" (list "/bin/sh" "-ec" $wait)) -}}
+  {{- end -}}
+  {{- if $writableConfig -}}
+    {{- if or (not $app.persistence.enabled) (gt (int $app.replicas) 1) -}}
+      {{- fail "cliproxyapi.writableConfig requires persistent storage and at most one replica" -}}
+    {{- end -}}
+    {{- if and (eq $updateStrategy.type "RollingUpdate") (not $waitForKvLock) -}}
+      {{- fail "cliproxyapi.writableConfig requires cliproxyapi.waitForKvLock with RollingUpdate" -}}
+    {{- end -}}
+    {{- $script := $.Files.Get "files/cliproxyapi/prepare-config.sh" -}}
+    {{- $prepare := dict "image" $app.image "resources" $app.resources
+          "command" (list "/bin/sh" "-ec" $script "prepare-config" "/run/cliproxyapi-bootstrap/config.yaml" "/var/lib/cliproxyapi") -}}
+    {{- if $waitForKvLock -}}
+      {{- $_ := set $prepare "dependsOn" "wait-for-kv" -}}
+    {{- end -}}
+    {{- $_ := set $initContainers "prepare-config" $prepare -}}
+    {{- $_ := set $container "command" (list "/CLIProxyAPI/CLIProxyAPI") -}}
+    {{- $_ := set $container "args" (list "-config" "/var/lib/cliproxyapi/config.yaml") -}}
   {{- end -}}
   {{- $_ := set $controllers $name (dict
         "type" "deployment" "forceRename" (printf "%s-%s" $fullname $name)
@@ -89,6 +108,11 @@
     {{- if $waitForKvLock -}}
       {{- $_ := set $appMounts "wait-for-kv" (list (dict "path" "/auths" "subPath" "auths" "readOnly" true)) -}}
     {{- end -}}
+    {{- if $writableConfig -}}
+      {{- $configMount := dict "path" "/var/lib/cliproxyapi" "subPath" "config" -}}
+      {{- $_ := set $appMounts $name (append $mounts $configMount) -}}
+      {{- $_ := set $appMounts "prepare-config" (list $configMount) -}}
+    {{- end -}}
     {{- $_ := set $volumes (printf "%s-data" $name) (dict
           "type" (ternary "persistentVolumeClaim" "emptyDir" $app.persistence.enabled)
           "forceRename" (printf "%s-%s" $fullname $name) "retain" false
@@ -105,10 +129,13 @@
         (dict "path" "/etc/ssl/certs/ca-certificates.crt" "subPath" "ca-certificates.crt" "readOnly" true))))) -}}
 {{- end -}}
 
+{{- $configMounts := dict "cliproxyapi" (list (dict "path" "/CLIProxyAPI/config.yaml" "subPath" "config.yaml")) -}}
+{{- if .Values.cliproxyapi.writableConfig -}}
+  {{- $configMounts = dict "prepare-config" (list (dict "path" "/run/cliproxyapi-bootstrap" "readOnly" true)) -}}
+{{- end -}}
 {{- $_ := set $volumes "cliproxyapi-config" (dict "type" "secret" "name" $configSecret
       "items" (list (dict "key" "cliproxyapi-config.yaml" "path" "config.yaml"))
-      "advancedMounts" (dict "cliproxyapi" (dict "cliproxyapi" (list
-        (dict "path" "/CLIProxyAPI/config.yaml" "subPath" "config.yaml"))))) -}}
+      "advancedMounts" (dict "cliproxyapi" $configMounts)) -}}
 
 {{- if .Values.nginx.enabled -}}
   {{- $siteItems := list -}}

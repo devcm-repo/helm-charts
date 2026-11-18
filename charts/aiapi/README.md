@@ -63,6 +63,8 @@ The gateway serves `/doc/`, `/getstart/*`, `/cpa/*`, and `/v1/codex/models`. Rem
 | `cliproxyapi.waitForKvLock` | Wait for the default local bbolt database to unlock before starting CPA. | `false` |
 | `cliproxyapi.image.repository` | CPA container image repository. | `eceasy/cli-proxy-api` |
 | `cliproxyapi.config` | CPA YAML configuration; accepts `--set-file`. | See [values.yaml](values.yaml) |
+| `cliproxyapi.tz` | CPA time zone. Inherits the chart-wide `tz` when empty. | `""` |
+| `cliproxyapi.writableConfig` | Persist configuration edits from CPA management on its PVC. Requires a single replica and persistent storage. | `false` |
 | `cliproxyapi.extraEnv` | Additional CPA environment variables and Secret references. | `[]` |
 | `cliproxyapi.caSecretName` | Existing Secret containing the complete `ca-certificates.crt` trust bundle. | `""` |
 | `cliproxyapi.proxy.enabled` | Add a sing-box client sidecar to the CPA Pod; configure CPA to use `127.0.0.1:1080`. | `false` |
@@ -78,5 +80,7 @@ The gateway serves `/doc/`, `/getstart/*`, `/cpa/*`, and `/v1/codex/models`. Rem
 | `affinity` | Node/Pod affinity rules for the application Pods. | `{}` |
 
 For a rolling update using CPA's default local bbolt store, use one replica, `maxSurge: 0`, `maxUnavailable: 1`, and `cliproxyapi.waitForKvLock: true`. CPA is temporarily unavailable while the old replica shuts down and the new Pod acquires the database lock.
+
+When `cliproxyapi.writableConfig` is enabled, the CPA config from the Secret seeds the PVC. Pod replacements retain management changes for the same seed. Updating the seed content replaces the writable copy on the next CPA rollout. With `RollingUpdate`, enable `cliproxyapi.waitForKvLock` to wait for the previous process to release its database lock before preparing the config.
 
 See [values.yaml](values.yaml) for all options. Uninstalling this chart deletes its New API/CPA PVCs; back up data first.
