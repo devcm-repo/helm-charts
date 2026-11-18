@@ -3,6 +3,35 @@ entries:
   aiapi:
   - apiVersion: v2
     appVersion: latest
+    created: "2026-11-18T06:31:22.281939767Z"
+    dependencies:
+    - name: common
+      repository: oci://ghcr.io/bjw-s-labs/helm
+      version: 5.3.0
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 18.6.2
+    - condition: valkey.enabled
+      name: valkey
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 5.4.11
+    description: New API, CLIProxyAPI and nginx/njs gateway Helm Chart
+    digest: 9f7fc05f19f16c06144ad554ae0c879205f800a536d0304bf6f707110841985d
+    home: https://devcm-repo.github.io/helm-charts/
+    kubeVersion: '>=1.28.0-0'
+    maintainers:
+    - email: admin@dev.cm
+      name: dev.cm
+      url: https://github.com/devcm-repo
+    name: aiapi
+    sources:
+    - https://github.com/devcm-repo/helm-charts
+    urls:
+    - https://github.com/devcm-repo/helm-charts/releases/download/aiapi-0.0.8/aiapi-0.0.8.tgz
+    version: 0.0.8
+  - apiVersion: v2
+    appVersion: latest
     created: "2026-11-18T05:50:07.125949514Z"
     dependencies:
     - name: common
@@ -618,4 +647,4 @@ entries:
     urls:
     - https://github.com/devcm-repo/helm-charts/releases/download/website-0.0.1/website-0.0.1.tgz
     version: 0.0.1
-generated: "2026-11-18T05:50:07.848031288Z"
+generated: "2026-11-18T06:31:22.994515001Z"
