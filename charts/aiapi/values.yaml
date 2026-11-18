@@ -8,6 +8,8 @@ global:
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
+# Existing Secret with newapi-session-secret and cliproxyapi-config.yaml.
+existingSecret: ""
 
 nodeSelector: {}
 affinity: {}
@@ -102,6 +104,22 @@ cliproxyapi:
   port: 8080
   # Use valueFrom.secretKeyRef for credentials required by custom CPA plugins.
   extraEnv: []
+  # Optional Secret with a ca-certificates.crt key containing the full CA bundle.
+  caSecretName: ""
+  # Optional per-Pod sing-box client; CPA connects through 127.0.0.1:1080.
+  proxy:
+    enabled: false
+    configSecretName: ""
+    image:
+      repository: ghcr.io/sagernet/sing-box
+      tag: v1.14.4
+      pullPolicy: IfNotPresent
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        memory: 128Mi
   resources: {}
   persistence:
     enabled: true

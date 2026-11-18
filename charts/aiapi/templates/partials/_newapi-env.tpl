@@ -18,7 +18,7 @@
 - name: SESSION_SECRET
   valueFrom:
     secretKeyRef:
-      name: "{{ include "aiapi.fullname" . }}"
+      name: "{{ include "aiapi.configSecretName" . }}"
       key: newapi-session-secret
 - name: FRONTEND_BASE_URL
   value: {{ include "aiapi.publicUrl" . | quote }}

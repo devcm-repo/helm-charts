@@ -1,6 +1,6 @@
 # aiapi Helm Chart
 
-This Helm Chart deploys New API, CLIProxyAPI (CPA), and an nginx/njs gateway, with optional PostgreSQL and Valkey. Requires Kubernetes 1.31 or later.
+This Helm Chart deploys New API, CLIProxyAPI (CPA), and an nginx/njs gateway, with optional PostgreSQL and Valkey. Requires Kubernetes 1.28 or later.
 
 ## Installing the Helm Chart
 
@@ -12,7 +12,9 @@ helm install aiapi charts/aiapi --namespace aiapi --create-namespace \
   -f values.yaml --set-file cliproxyapi.config=./config.yaml
 ```
 
-Prepare the TLS Secret and optional Basic Auth Secret in the `aiapi` namespace. The Basic Auth Secret must contain `cliproxyapi.htpasswd`. CPA configuration is read-only; update it through Helm.
+Prepare the TLS Secret and optional Basic Auth Secret in the `aiapi` namespace. The Basic Auth Secret must contain `cliproxyapi.htpasswd`. CPA configuration is read-only; update it through Helm, or use `existingSecret` to keep credentials outside Helm values.
+
+For the infra environment, `python3 scripts/render-secrets.py /path/to/aiapi` reads `.env` and `values.yaml` and outputs the required Kubernetes Secrets. It requires PyYAML. Apply the generated Secrets before upgrading Helm; the chart hashes the existing configuration Secret during an upgrade to refresh mounted configuration.
 
 ## Helm Chart Configuration Examples
 
@@ -45,6 +47,7 @@ The gateway serves `/doc/`, `/getstart/*`, `/cpa/*`, and `/v1/codex/models`. Rem
 | Key | Description | Default |
 |---|---|---|
 | `publicUrl` | Public URL; also determines the Ingress host. | `https://aiapi.eshetang.com` |
+| `existingSecret` | Existing Secret with `newapi-session-secret` and `cliproxyapi-config.yaml`; disables the chart-managed Secret. | `""` |
 | `nginx.enabled` | Enable the nginx/njs gateway. | `true` |
 | `nginx.basicAuthSecretName` | Existing Basic Auth Secret; empty denies management UI login. | `""` |
 | `newapi.image.repository` | New API container image repository. | `calciumion/new-api` |
@@ -58,6 +61,10 @@ The gateway serves `/doc/`, `/getstart/*`, `/cpa/*`, and `/v1/codex/models`. Rem
 | `cliproxyapi.image.repository` | CPA container image repository. | `eceasy/cli-proxy-api` |
 | `cliproxyapi.config` | CPA YAML configuration; accepts `--set-file`. | See [values.yaml](values.yaml) |
 | `cliproxyapi.extraEnv` | Additional CPA environment variables and Secret references. | `[]` |
+| `cliproxyapi.caSecretName` | Existing Secret containing the complete `ca-certificates.crt` trust bundle. | `""` |
+| `cliproxyapi.proxy.enabled` | Add a sing-box client sidecar to the CPA Pod; configure CPA to use `127.0.0.1:1080`. | `false` |
+| `cliproxyapi.proxy.configSecretName` | Existing Secret with the client's `config.json`; mounted only into sing-box. | `""` |
+| `cliproxyapi.proxy.image` | sing-box sidecar image settings. | `ghcr.io/sagernet/sing-box:v1.14.4` |
 | `postgresql.enabled` | Deploy bundled PostgreSQL. | `true` |
 | `postgresql.auth.password` | PostgreSQL user password; replace before deployment. | `change-me` |
 | `valkey.enabled` | Deploy bundled Valkey. | `true` |

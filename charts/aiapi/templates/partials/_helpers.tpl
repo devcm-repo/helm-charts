@@ -16,6 +16,10 @@ helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end -}}
 
+{{- define "aiapi.configSecretName" -}}
+{{- default (include "aiapi.fullname" .) .Values.existingSecret -}}
+{{- end -}}
+
 {{- define "aiapi.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "aiapi.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
@@ -55,8 +59,13 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- default (get (urlParse (include "aiapi.publicUrl" .)) "hostname") .Values.newapi.ingress.host -}}
 {{- end -}}
 
-{{/* Preserve existing immutable Deployment selectors when using the pinned common library. */}}
+{{/* Preserve selectors across common-library upgrades. */}}
 {{- define "bjw-s.common.lib.controller.metadata.selectorLabels" -}}
+{{- $existing := lookup "apps/v1" "Deployment" .rootContext.Release.Namespace .controllerObject.name -}}
+{{- if $existing -}}
+{{- toYaml $existing.spec.selector.matchLabels -}}
+{{- else -}}
 {{- include "aiapi.selectorLabels" .rootContext }}
 app.kubernetes.io/component: {{ .controllerObject.identifier }}
+{{- end -}}
 {{- end -}}
