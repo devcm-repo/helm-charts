@@ -98,14 +98,7 @@ write_config_toml() {
     '' \
     '' \
     features \
-    'remote_compaction_v2 = true' > "$FILTERED_TMP"
-
-  aiapi_merge_toml_table \
-    "$FILTERED_TMP" \
-    '' \
-    '' \
-    features \
-    'multi_agent_v2 = true' > "$MERGED_TMP"
+    'remote_compaction_v2 = true\nmulti_agent_v2 = true\ncode_mode_only_strict_3p_tools = true' > "$MERGED_TMP"
 
   {
     printf 'model = "%s"\n' "$model_value"
@@ -154,10 +147,9 @@ CATALOG_URL="${EST_API_BASE_URL%/}/codex/models"
 STAMP="$(aiapi_timestamp)"
 
 CONFIG_TMP="$(mktemp "$CODEX_HOME_DIR/config.toml.tmp.XXXXXX")"
-FILTERED_TMP="$(mktemp "$CODEX_HOME_DIR/config.filtered.tmp.XXXXXX")"
 MERGED_TMP="$(mktemp "$CODEX_HOME_DIR/config.merged.tmp.XXXXXX")"
 CATALOG_TMP="$(mktemp "$CODEX_HOME_DIR/aiapi-models.json.tmp.XXXXXX")"
-trap 'rm -f "$CONFIG_TMP" "$FILTERED_TMP" "$MERGED_TMP" "$CATALOG_TMP"' EXIT HUP INT TERM
+trap 'rm -f "$CONFIG_TMP" "$MERGED_TMP" "$CATALOG_TMP"' EXIT HUP INT TERM
 
 download_model_catalog
 aiapi_backup_file "$CONFIG_FILE" "$STAMP"

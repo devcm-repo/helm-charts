@@ -113,7 +113,11 @@ $filteredLines = @(Merge-AiapiTomlTable `
   -RootKeys @() `
   -RemoveTables @() `
   -Table "features" `
-  -ManagedLines @("remote_compaction_v2 = true", "multi_agent_v2 = true"))
+  -ManagedLines @(
+    "remote_compaction_v2 = true",
+    "multi_agent_v2 = true",
+    "code_mode_only_strict_3p_tools = true"
+  ))
 $configLines = @(
   "model = `"$(Escape-AiapiTomlString $Model)`"",
   "model_provider = `"$(Escape-AiapiTomlString $ProviderId)`""

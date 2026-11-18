@@ -2,7 +2,7 @@ import fs from "fs";
 
 const cpaConfigPath = "/run/secrets/cliproxyapi-config.yaml";
 const DIRECT_COMPAT_PROFILE = {
-  tool_mode: "direct",
+  tool_mode: "code_mode_only",
   use_responses_lite: false,
   supports_search_tool: false,
   prefer_websockets: false,
