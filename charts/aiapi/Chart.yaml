@@ -8,7 +8,7 @@ maintainers:
   - name: dev.cm
     email: admin@dev.cm
     url: https://github.com/devcm-repo
-version: 0.0.9
+version: 0.0.10
 appVersion: latest
 kubeVersion: ">=1.28.0-0"
 dependencies:
