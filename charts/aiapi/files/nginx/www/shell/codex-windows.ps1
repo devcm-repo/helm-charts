@@ -1,4 +1,4 @@
-$ErrorActionPreference = "Stop"
+﻿$ErrorActionPreference = "Stop"
 $ProgressPreference = "SilentlyContinue"
 try {
   [Console]::OutputEncoding = [Text.Encoding]::UTF8
@@ -107,7 +107,7 @@ $filteredLines = @(Merge-AiapiTomlTable `
   -RootKeys $ManagedRootKeys `
   -RemoveTables @("profiles.$LegacyProfile", "model_providers.$ProviderId", "model_providers.$LegacyProviderId") `
   -Table "agents" `
-  -ManagedLines @("max_concurrent_threads_per_session = 12"))
+  -ManagedLines @("max_concurrent_threads_per_session = 4"))
 $filteredLines = @(Merge-AiapiTomlTable `
   -Lines $filteredLines `
   -RootKeys @() `

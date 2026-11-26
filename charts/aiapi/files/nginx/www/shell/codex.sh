@@ -91,7 +91,7 @@ write_config_toml() {
     'model model_provider model_catalog_json openai_base_url profile web_search' \
     "profiles.$EST_LEGACY_PROFILE model_providers.$EST_PROVIDER_ID model_providers.$EST_LEGACY_PROVIDER_ID" \
     agents \
-    'max_concurrent_threads_per_session = 12' > "$CONFIG_TMP"
+    'max_concurrent_threads_per_session = 4' > "$CONFIG_TMP"
 
   aiapi_merge_toml_table \
     "$CONFIG_TMP" \

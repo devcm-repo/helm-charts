@@ -18,28 +18,51 @@ function send(r, status, body) {
   r.return(status, JSON.stringify(body));
 }
 
-export function cpaAuthorizationFromConfig(config) {
-  const lines = typeof config === "string" ? config.split(/\r?\n/) : [];
-  let listIndent = -1;
-
-  for (const line of lines) {
-    const key = line.match(/^(\s*)api-keys\s*:\s*(?:#.*)?$/);
-    if (key) {
-      listIndent = key[1].length;
-      continue;
-    }
-    if (listIndent < 0 || /^\s*(?:#.*)?$/.test(line)) continue;
-
+function extractFirstListScalar(lines, startIndex, listIndent) {
+  for (let i = startIndex; i < lines.length; i++) {
+    const line = lines[i];
+    if (/^\s*(?:#.*)?$/.test(line)) continue;
     const indent = (line.match(/^\s*/) || [""])[0].length;
     const item = line.match(/^\s*-\s*(.*?)\s*$/);
     if (item && indent >= listIndent) {
-      const raw = item[1].replace(/\s+#.*$/, "").trim();
-      const keyValue = /^(["'])(.*)\1$/.test(raw) ? raw.slice(1, -1) : raw;
-      return keyValue ? "Bearer " + keyValue : "";
+      const value = yamlScalar(item[1]);
+      return value ? "Bearer " + value : "";
     }
     if (indent <= listIndent) break;
+    // Child mapping under api-keys: (e.g. CPA v8 provider map), not a key list.
+    break;
   }
   return "";
+}
+
+export function cpaAuthorizationFromConfig(config) {
+  const lines = typeof config === "string" ? config.split(/\r?\n/) : [];
+  let inAccess = false;
+  let legacyFallback = "";
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (/^\s*(?:#.*)?$/.test(line)) continue;
+    const indent = (line.match(/^\s*/) || [""])[0].length;
+
+    if (indent === 0) {
+      const top = line.match(/^([a-z0-9-]+)\s*:\s*(?:#.*)?$/i);
+      inAccess = Boolean(top && top[1] === "access");
+      if (top && top[1] === "api-keys" && !legacyFallback) {
+        legacyFallback = extractFirstListScalar(lines, i + 1, 0);
+      }
+      continue;
+    }
+
+    if (inAccess) {
+      const key = line.match(/^(\s*)api-keys\s*:\s*(?:#.*)?$/);
+      if (key) {
+        const found = extractFirstListScalar(lines, i + 1, key[1].length);
+        if (found) return found;
+      }
+    }
+  }
+  return legacyFallback;
 }
 
 export function cpaAuthorization() {
@@ -61,7 +84,12 @@ function routeForSection(section) {
   if (section === "openai-compatibility") {
     return { kind: "direct_compat", protocol: "openai_compat" };
   }
-  if (section === "codex-api-key" || section === "xai-api-key") {
+  if (
+    section === "codex-api-key" ||
+    section === "xai-api-key" ||
+    section === "codex" ||
+    section === "xai"
+  ) {
     return { kind: "direct_compat", protocol: "third_party_responses" };
   }
   return null;
@@ -70,8 +98,13 @@ function routeForSection(section) {
 export function cpaTransportRoutesFromConfig(config) {
   const routes = {};
   const lines = typeof config === "string" ? config.split(/\r?\n/) : [];
+  let inApiKeysBlock = false;
+  let apiKeysChildIndent = -1;
   let section = "";
+  let sectionIndent = -1;
   let modelsIndent = -1;
+  let itemIndent = -1;
+  let fieldIndent = -1;
   let model = null;
 
   const commit = () => {
@@ -83,41 +116,103 @@ export function cpaTransportRoutesFromConfig(config) {
     model = null;
   };
 
+  const resetModels = () => {
+    commit();
+    modelsIndent = -1;
+    itemIndent = -1;
+    fieldIndent = -1;
+  };
+
   for (const line of lines) {
     if (/^\s*(?:#.*)?$/.test(line)) continue;
     const indent = (line.match(/^\s*/) || [""])[0].length;
-    const topLevel = indent === 0 && line.match(/^([a-z0-9-]+)\s*:/i);
-    if (topLevel) {
-      commit();
-      section = routeForSection(topLevel[1]) ? topLevel[1] : "";
-      modelsIndent = -1;
+
+    if (indent === 0) {
+      resetModels();
+      const top = line.match(/^([a-z0-9-]+)\s*:/i);
+      if (top && top[1] === "api-keys") {
+        inApiKeysBlock = true;
+        apiKeysChildIndent = -1;
+        section = "";
+        sectionIndent = -1;
+      } else if (top && routeForSection(top[1])) {
+        inApiKeysBlock = false;
+        apiKeysChildIndent = -1;
+        section = top[1];
+        sectionIndent = 0;
+      } else {
+        inApiKeysBlock = false;
+        apiKeysChildIndent = -1;
+        section = "";
+        sectionIndent = -1;
+      }
       continue;
     }
+
+    if (inApiKeysBlock) {
+      if (apiKeysChildIndent < 0) {
+        if (/^\s*-/.test(line)) {
+          // Legacy v7 top-level api-keys list, not a v8 provider map.
+          inApiKeysBlock = false;
+          continue;
+        }
+        apiKeysChildIndent = indent;
+      }
+      if (indent === apiKeysChildIndent && !/^\s*-/.test(line)) {
+        resetModels();
+        const sub = line.match(/^\s*([a-z0-9-]+)\s*:/i);
+        if (sub && routeForSection(sub[1])) {
+          section = sub[1];
+          sectionIndent = indent;
+        } else {
+          section = "";
+          sectionIndent = -1;
+        }
+        continue;
+      }
+    }
+
     if (!section) continue;
 
-    const models = line.match(/^\s*models\s*:\s*(?:#.*)?$/);
-    if (models) {
-      commit();
-      modelsIndent = indent;
-      continue;
+    if (modelsIndent >= 0) {
+      if (indent < modelsIndent || (indent === modelsIndent && !/^\s*-/.test(line))) {
+        resetModels();
+      } else {
+        const dash = line.match(/^(\s*-\s*)(.*)$/);
+        if (dash && (itemIndent < 0 || indent === itemIndent)) {
+          commit();
+          itemIndent = indent;
+          fieldIndent = dash[1].length;
+          model = { name: "", alias: "" };
+          const inlineName = dash[2].match(/^name\s*:\s*(.*?)\s*$/);
+          const inlineAlias = dash[2].match(/^alias\s*:\s*(.*?)\s*$/);
+          if (inlineName) model.name = yamlScalar(inlineName[1]);
+          if (inlineAlias) model.alias = yamlScalar(inlineAlias[1]);
+          continue;
+        }
+        if (model && indent === fieldIndent) {
+          const name = line.match(/^\s*name\s*:\s*(.*?)\s*$/);
+          if (name) {
+            model.name = yamlScalar(name[1]);
+            continue;
+          }
+          const alias = line.match(/^\s*alias\s*:\s*(.*?)\s*$/);
+          if (alias) {
+            model.alias = yamlScalar(alias[1]);
+            continue;
+          }
+        }
+        continue;
+      }
     }
-    if (modelsIndent < 0) continue;
 
-    const name = line.match(/^\s*-\s*name\s*:\s*(.*?)\s*$/);
-    if (name && indent >= modelsIndent) {
-      commit();
-      model = { name: yamlScalar(name[1]), alias: "" };
-      continue;
+    const models = line.match(/^\s*models\s*:\s*(?:#.*)?$/);
+    if (models && indent > sectionIndent) {
+      resetModels();
+      modelsIndent = indent;
     }
-    if (indent < modelsIndent || (indent === modelsIndent && !/^\s*-/.test(line))) {
-      commit();
-      modelsIndent = -1;
-      continue;
-    }
-    const alias = line.match(/^\s*alias\s*:\s*(.*?)\s*$/);
-    if (model && alias) model.alias = yamlScalar(alias[1]);
   }
-  commit();
+  resetModels();
   return routes;
 }
 
@@ -183,6 +278,7 @@ export function buildModels(source, cpaCatalog, cpaRoutes = {}) {
     const slug = model.slug.toLowerCase().split("/").pop();
     const contextRule = CONTEXT_WINDOW_RULES.find(rule => rule.pattern.test(slug));
     if (contextRule) model.context_window = contextRule.context_window;
+    if (model.visibility === "list") model.supported_in_api = true;
 
     models.push(model);
     seen[id] = true;
